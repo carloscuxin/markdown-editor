@@ -92,7 +92,7 @@ const Pages = {
       placeholder: 'Escribe el contenido aquí...',
       toolbarItems: [
         ['heading', 'bold', 'italic', 'strike'],
-        ['color'],
+        // ['color'], // requires toastui-editor-plugin-color-syntax
         ['hr', 'quote', 'code', 'codeblock'],
         ['ul', 'ol', 'task', 'indent', 'outdent'],
         ['table', 'image', 'link']
