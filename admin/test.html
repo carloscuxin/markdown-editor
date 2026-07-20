@@ -22,11 +22,11 @@ const base = { initialEditType: 'wysiwyg', height: '600px' }
 const r = document.getElementById('result')
 let html = ''
 
-html += '<b>base</b>: ' + test('base', base) + '<br>'
-html += '<b>+placeholder</b>: ' + test('placeholder', { ...base, placeholder: 'test' }) + '<br>'
-html += '<b>+toolbar</b>: ' + test('toolbar', { ...base, toolbarItems: [['heading','bold','italic','strike'],['hr','quote','code','codeblock'],['ul','ol','task','indent','outdent'],['table','image','link']] }) + '<br>'
-html += '<b>+usageStats</b>: ' + test('usageStats', { ...base, usageStatistics: false }) + '<br>'
-html += '<b>+toolbar+usageStats</b>: ' + test('toolbar+usage', { ...base, toolbarItems: [['heading','bold','italic','strike'],['hr','quote','code','codeblock'],['ul','ol','task','indent','outdent'],['table','image','link']], usageStatistics: false }) + '<br>'
+// Test each group
+html += '<b>group1</b> (heading,bold,italic,strike): ' + test('g1', { ...base, toolbarItems: [['heading','bold','italic','strike']] }) + '<br>'
+html += '<b>group2</b> (hr,quote,code,codeblock): ' + test('g2', { ...base, toolbarItems: [['hr','quote','code','codeblock']] }) + '<br>'
+html += '<b>group3</b> (ul,ol,task,indent,outdent): ' + test('g3', { ...base, toolbarItems: [['ul','ol','task','indent','outdent']] }) + '<br>'
+html += '<b>group4</b> (table,image,link): ' + test('g4', { ...base, toolbarItems: [['table','image','link']] }) + '<br>'
 
 r.innerHTML = html
 </script>
