@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html><body>
+<div id="editor"></div>
+<script src="https://uicdn.toast.com/editor/2.5.4/toastui-editor-all.min.js"></script>
+<script>
+try {
+  const e = new toastui.Editor({
+    el: document.querySelector('#editor'),
+    initialEditType: 'wysiwyg',
+    height: '300px',
+  })
+  console.log('OK', typeof e)
+} catch (err) {
+  console.error('ERR', err.message)
+}
+</script>
+</body></html>
