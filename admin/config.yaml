@@ -1,7 +1,8 @@
 backend:
   name: github
   repo: carloscuxin/markdown-editor
-  branch: main # O la rama donde esté tu GitHub Pages (ej. gh-pages)
+  branch: main
+  client_id: Ov23liUhDgzOsbFwCXsW
 
 media_folder: "assets/uploads" # Carpeta donde se guardarán las imágenes y archivos adjuntos
 public_folder: "/assets/uploads"
@@ -9,7 +10,7 @@ public_folder: "/assets/uploads"
 collections:
   - name: "wiki"
     label: "Páginas de la Wiki"
-    folder: "wiki" # Carpeta raíz en tu repo donde se guardarán los archivos .md creados
+    folder: "docs" # Carpeta raíz en tu repo donde se guardarán los archivos .md creados
     create: true # Permite a los usuarios crear páginas nuevas
     slug: "{{slug}}"
     fields:
