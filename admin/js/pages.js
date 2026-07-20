@@ -100,6 +100,57 @@ const Pages = {
       usageStatistics: false
     })
 
+    mermaid.initialize({ startOnLoad: false, theme: 'default' })
+
+    window.editor.eventManager.listen('previewRenderAfter', (preview) => {
+      const els = preview._previewContent.querySelectorAll('pre > code.language-mermaid')
+      els.forEach(el => {
+        const pre = el.parentElement
+        if (pre.querySelector('svg')) return
+        const code = el.textContent
+        pre.textContent = code
+        pre.className = 'mermaid'
+      })
+      mermaid.run({ nodes: preview._previewContent.querySelectorAll('pre.mermaid') })
+    })
+
+    const renderWysiwygMermaid = () => {
+      const ww = window.editor.getCurrentModeEditor()
+      if (!ww || !ww.getBody) return
+      const body = ww.getBody()
+      const blocks = body.querySelectorAll('pre code.language-mermaid')
+      blocks.forEach(codeEl => {
+        const pre = codeEl.parentElement
+        if (pre.querySelector('svg')) return
+        pre.dataset.mermaid = codeEl.textContent
+        pre.textContent = codeEl.textContent
+        pre.className = 'mermaid'
+        pre.removeChild(codeEl)
+      })
+      mermaid.run({ nodes: body.querySelectorAll('pre.mermaid') })
+    }
+    const restoreWysiwygMermaid = () => {
+      const ww = window.editor.getCurrentModeEditor()
+      if (!ww || !ww.getBody) return
+      const body = ww.getBody()
+      body.querySelectorAll('pre.mermaid[data-mermaid]').forEach(pre => {
+        const code = pre.dataset.mermaid
+        delete pre.dataset.mermaid
+        pre.className = ''
+        pre.textContent = ''
+        const codeEl = document.createElement('code')
+        codeEl.className = 'language-mermaid'
+        codeEl.textContent = code
+        pre.appendChild(codeEl)
+      })
+    }
+
+    window.editor.eventManager.listen('wysiwygSetValueAfter', renderWysiwygMermaid)
+    window.editor.eventManager.listen('wysiwygGetValueBefore', restoreWysiwygMermaid)
+    window.editor.eventManager.listen('changeMode', () => {
+      if (window.editor.getCurrentMode() === 'wysiwyg') setTimeout(renderWysiwygMermaid, 200)
+    })
+
     window.editor.addHook('addImageBlobHook', async (blob, callback) => {
       try {
         const base64 = await Pages._blobToBase64(blob)
