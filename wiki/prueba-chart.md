@@ -1,12 +1,12 @@
 
-\`\`\`mermaid
+```mermaid
 flowchart TD
-    Client\[Client / Partner Bank\] \-\-\>\|API\| Gateway\[Helios API Gateway\]
-    Gateway --> Payments[Instant Payments Service]
-    Gateway --> Cards[Card Processing Service]
-    Payments --> Ledger[(Ledger)]
-    Payments --> Fraud[Fraud & Risk Engine]
-    Cards --> Fraud
-    Fraud --> Ledger
-    Ledger --> Notify[Notifications]
-\`\`\`
+Â Â Â  Client\[Client / Partner Bank\] \-\-\>\|API\| Gateway\[Helios API Gateway\]
+Â Â Â  Gateway --> Payments[Instant Payments Service]
+Â Â Â  Gateway --> Cards[Card Processing Service]
+Â Â Â  Payments --> Ledger[(Ledger)]
+Â Â Â  Payments --> Fraud[Fraud & Risk Engine]
+Â Â Â  Cards --> Fraud
+Â Â Â  Fraud --> Ledger
+Â Â Â  Ledger --> Notify[Notifications]
+```
