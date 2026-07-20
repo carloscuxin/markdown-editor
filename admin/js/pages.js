@@ -91,11 +91,11 @@ const Pages = {
       initialValue,
       placeholder: 'Escribe el contenido aquí...',
       toolbarItems: [
-        ['heading', 'bold', 'italic', 'strike'],
-        // ['color'], // requires toastui-editor-plugin-color-syntax
-        ['hr', 'quote', 'code', 'codeblock'],
-        ['ul', 'ol', 'task', 'indent', 'outdent'],
-        ['table', 'image', 'link']
+        'heading', 'bold', 'italic', 'strike',
+        'divider', 'hr', 'quote',
+        'divider', 'ul', 'ol', 'task', 'indent', 'outdent',
+        'divider', 'table', 'image', 'link',
+        'divider', 'code', 'codeblock'
       ],
       usageStatistics: false
     })
