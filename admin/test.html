@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html><body>
+<html><head>
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/2.5.4/toastui-editor.min.css" />
+</head><body>
 <div id="editor"></div>
+<div id="result"></div>
 <script src="https://uicdn.toast.com/editor/2.5.4/toastui-editor-all.min.js"></script>
 <script>
+const r = document.getElementById('result')
 try {
   const e = new toastui.Editor({
     el: document.querySelector('#editor'),
     initialEditType: 'wysiwyg',
     height: '300px',
   })
-  console.log('OK', typeof e)
+  r.textContent = 'OK - editor created'
+  r.style.color = 'green'
 } catch (err) {
-  console.error('ERR', err.message)
+  r.textContent = 'ERROR: ' + err.message
+  r.style.color = 'red'
 }
 </script>
 </body></html>
