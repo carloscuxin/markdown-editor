@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Páginas</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Documentación</h1>
+    <div class="user-info" id="user-info"></div>
+  </header>
+
+  <main class="app-main">
+    <div class="dashboard-header">
+      <h2>Páginas</h2>
+      <a href="editor.html" class="btn btn-primary">+ Nueva página</a>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display:none">
+      <p>No hay páginas todavía. Crea la primera.</p>
+    </div>
+
+    <div id="pages-list"></div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pages.js"></script>
+  <script>
+    (async () => {
+      const user = await Auth.validateToken()
+      if (!user) { window.location.href = 'login.html'; return }
+
+      const info = document.getElementById('user-info')
+      info.innerHTML = `
+        <span>${user.login}</span>
+        <img src="${user.avatar_url}" alt="" />
+        <button class="btn btn-sm" onclick="Auth.logout()">Cerrar sesión</button>
+      `
+
+      await Pages.loadDashboard()
+    })()
+  </script>
+</body>
+</html>

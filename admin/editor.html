@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Editor</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Documentación</h1>
+    <div class="user-info" id="user-info"></div>
+  </header>
+
+  <div class="editor-section">
+    <div class="editor-header">
+      <h2 id="page-title">Editor</h2>
+      <a href="dashboard.html" class="btn">← Volver</a>
+    </div>
+
+    <div id="title-field" style="display:none">
+      <input type="text" id="title-input" placeholder="Título de la página" />
+    </div>
+
+    <div class="editor-toolbar"></div>
+    <div id="editor-container"></div>
+
+    <div class="editor-actions">
+      <button class="btn btn-primary" onclick="Pages.savePage()">Guardar</button>
+      <a href="dashboard.html" class="btn">Cancelar</a>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.3/turndown.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pages.js"></script>
+  <script>
+    (async () => {
+      const user = await Auth.validateToken()
+      if (!user) { window.location.href = 'login.html'; return }
+
+      const info = document.getElementById('user-info')
+      info.innerHTML = `
+        <span>${user.login}</span>
+        <img src="${user.avatar_url}" alt="" />
+        <button class="btn btn-sm" onclick="Auth.logout()">Cerrar sesión</button>
+      `
+
+      const isNew = !new URLSearchParams(window.location.search).get('file')
+      document.getElementById('title-field').style.display = isNew ? 'block' : 'none'
+
+      await Pages.loadEditor()
+    })()
+  </script>
+</body>
+</html>
