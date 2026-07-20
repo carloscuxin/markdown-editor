@@ -189,5 +189,49 @@ const Pages = {
     toast.textContent = message
     toast.className = `toast toast-${type} show`
     setTimeout(() => { toast.className = 'toast' }, 3000)
+  },
+
+  async previewMermaid() {
+    if (!window.editor) return
+    const markdown = window.editor.getMarkdown()
+    const mermaidRegex = /```mermaid\n([\s\S]*?)```/g
+    const matches = [...markdown.matchAll(mermaidRegex)]
+
+    if (matches.length === 0) {
+      this.showToast('No se encontraron bloques de código mermaid', 'error')
+      return
+    }
+
+    const container = document.getElementById('mermaid-container')
+    if (!container) return
+
+    container.innerHTML = '<div class="loading">Renderizando diagramas...</div>'
+    document.getElementById('mermaid-modal').style.display = 'flex'
+
+    try {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' })
+
+      const renderAll = async () => {
+        container.innerHTML = ''
+        for (let i = 0; i < matches.length; i++) {
+          const code = matches[i][1].trim()
+          const div = document.createElement('div')
+          div.className = 'mermaid'
+          div.textContent = code
+          container.appendChild(div)
+        }
+        await mermaid.run({ nodes: container.querySelectorAll('.mermaid') })
+      }
+
+      await renderAll()
+    } catch (err) {
+      container.innerHTML = `<div class="error">Error al renderizar: ${err.message}</div>`
+    }
+  },
+
+  closeMermaidModal(event) {
+    if (event && event.target !== event.currentTarget) return
+    const modal = document.getElementById('mermaid-modal')
+    if (modal) modal.style.display = 'none'
   }
 }

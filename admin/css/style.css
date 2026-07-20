@@ -216,6 +216,53 @@ body {
 
 .editor-actions { display: flex; gap: 8px; margin-top: 20px; }
 
+/* Mermaid modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  min-width: 400px;
+}
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.modal-close:hover { color: var(--text); }
+#mermaid-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+  overflow-x: auto;
+}
+#mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .page-card { flex-direction: column; align-items: flex-start; gap: 10px; }
