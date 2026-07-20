@@ -103,14 +103,28 @@ const Pages = {
     window.editor.addHook('addImageBlobHook', async (blob, callback) => {
       try {
         const base64 = await Pages._blobToBase64(blob)
-        const ext = blob.type.split('/')[1] || 'png'
         const timestamp = Date.now()
-        const imageName = `image-${timestamp}.${ext}`
-        await API.uploadImage(imageName, base64)
-        const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${imageName}`
-        callback(url, imageName)
+        const origName = blob.name || `file-${timestamp}`
+        const filename = `${timestamp}-${origName}`
+
+        await API.uploadImage(filename, base64)
+        const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${filename}`
+
+        if (blob.type.startsWith('image/')) {
+          callback(url, origName.replace(/\.[^.]+$/, ''))
+        } else {
+          const editor = window.editor
+          const displayName = origName
+          const link = `[${displayName}](${url})`
+          if (editor.getCurrentMode() === 'wysiwyg') {
+            editor.getCurrentModeEditor().getEditor().insertHTML(`<a href="${url}">${displayName}</a>&nbsp;`)
+          } else {
+            editor.getCurrentModeEditor().replaceSelection(link)
+          }
+          Pages.showToast(`Archivo subido: ${displayName}`, 'success')
+        }
       } catch (err) {
-        Pages.showToast(`Error al subir imagen: ${err.message}`, 'error')
+        Pages.showToast(`Error al subir archivo: ${err.message}`, 'error')
       }
     })
   },
