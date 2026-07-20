@@ -97,21 +97,20 @@ const Pages = {
         ['ul', 'ol', 'task', 'indent', 'outdent'],
         ['table', 'image', 'link']
       ],
-      usageStatistics: false,
-      hooks: {
-        addImageBlob: async (blob, callback) => {
-          try {
-            const base64 = await Pages._blobToBase64(blob)
-            const ext = blob.type.split('/')[1] || 'png'
-            const timestamp = Date.now()
-            const imageName = `image-${timestamp}.${ext}`
-            await API.uploadImage(imageName, base64)
-            const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${imageName}`
-            callback(url, imageName)
-          } catch (err) {
-            Pages.showToast(`Error al subir imagen: ${err.message}`, 'error')
-          }
-        }
+      usageStatistics: false
+    })
+
+    window.editor.addHook('addImageBlobHook', async (blob, callback) => {
+      try {
+        const base64 = await Pages._blobToBase64(blob)
+        const ext = blob.type.split('/')[1] || 'png'
+        const timestamp = Date.now()
+        const imageName = `image-${timestamp}.${ext}`
+        await API.uploadImage(imageName, base64)
+        const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${imageName}`
+        callback(url, imageName)
+      } catch (err) {
+        Pages.showToast(`Error al subir imagen: ${err.message}`, 'error')
       }
     })
   },
