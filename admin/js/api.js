@@ -62,5 +62,16 @@ const API = {
         branch: 'main',
       }),
     })
+  },
+
+  async uploadImage(filename, content) {
+    return this._request(this._repoURL(`/assets/uploads/${encodeURIComponent(filename)}`), {
+      method: 'PUT',
+      body: JSON.stringify({
+        message: `docs: sube imagen ${filename}`,
+        content,
+        branch: 'main',
+      }),
+    })
   }
 }

@@ -177,8 +177,6 @@ body {
 .editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .editor-header h2 { font-size: 20px; font-weight: 600; }
 
-.editor-toolbar { margin-bottom: 16px; }
-
 #title-input {
   width: 100%;
   padding: 10px 12px;
@@ -193,17 +191,28 @@ body {
 #title-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,126,233,.15); }
 
 #editor-container {
-  background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
-  min-height: 400px;
-  font-size: 15px;
-  line-height: 1.6;
+  overflow: hidden;
+  font-family: inherit;
 }
 
-/* Quill overrides */
-.ql-container { font-family: inherit; font-size: inherit; min-height: 380px; }
-.ql-editor { min-height: 380px; }
+#editor-container .toastui-editor-defaultUI {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+#editor-container .toastui-editor-defaultUI-toolbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+#editor-container .toastui-editor-md-container,
+#editor-container .toastui-editor-ww-container {
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: inherit;
+}
 
 .editor-actions { display: flex; gap: 8px; margin-top: 20px; }
 

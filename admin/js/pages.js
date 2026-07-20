@@ -15,13 +15,11 @@ const Pages = {
       }
       if (empty) empty.style.display = 'none'
 
-      const promises = files.map(async f => {
+      const items = files.map(f => {
         const date = new Date().toLocaleDateString('es-ES')
-        const author = '—'
-        return { name: f.name, date, author }
+        return { name: f.name, date }
       })
 
-      const items = await Promise.all(promises)
       list.innerHTML = items.map(p => `
         <div class="page-card">
           <div class="page-info">
@@ -49,7 +47,6 @@ const Pages = {
   },
 
   async deletePage(filename) {
-    const toast = document.getElementById('toast')
     try {
       const { sha } = await API.getPage(filename)
       await API.deletePage(filename, sha)
@@ -71,35 +68,64 @@ const Pages = {
     }
 
     if (isNew) {
-      this.initQuill()
+      this.initEditor('')
       return
     }
 
     try {
       const { content } = await API.getPage(filename)
-      const html = new showdown.Converter().makeHtml(content)
-      this.initQuill(html)
+      this.initEditor(content)
     } catch (err) {
       this.showToast(`Error al cargar: ${err.message}`, 'error')
+      this.initEditor('')
     }
   },
 
-  initQuill(html = '') {
-    if (window.quill) return
-    window.quill = new Quill('#editor-container', {
-      theme: 'snow',
+  initEditor(initialValue) {
+    if (window.editor) return
+
+    window.editor = new toastui.Editor({
+      el: document.querySelector('#editor-container'),
+      initialEditType: 'wysiwyg',
+      height: '600px',
+      initialValue,
       placeholder: 'Escribe el contenido aquí...',
-      modules: {
-        toolbar: [
-          ['bold', 'italic', 'underline', 'strike'],
-          [{ header: [1, 2, 3, false] }],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'code-block'],
-          ['clean'],
-        ],
-      },
+      toolbarItems: [
+        ['heading', 'bold', 'italic', 'strike'],
+        ['color'],
+        ['hr', 'quote', 'code', 'codeblock'],
+        ['ul', 'ol', 'task', 'indent', 'outdent'],
+        ['table', 'image', 'link']
+      ],
+      usageStatistics: false,
+      hooks: {
+        addImageBlob: async (blob, callback) => {
+          try {
+            const base64 = await Pages._blobToBase64(blob)
+            const ext = blob.type.split('/')[1] || 'png'
+            const timestamp = Date.now()
+            const imageName = `image-${timestamp}.${ext}`
+            await API.uploadImage(imageName, base64)
+            const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${imageName}`
+            callback(url, imageName)
+          } catch (err) {
+            Pages.showToast(`Error al subir imagen: ${err.message}`, 'error')
+          }
+        }
+      }
     })
-    if (html) window.quill.root.innerHTML = html
+  },
+
+  _blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
   },
 
   async savePage() {
@@ -124,13 +150,11 @@ const Pages = {
         .replace(/^-|-$/g, '') + '.md'
     }
 
-    const html = window.quill?.root.innerHTML || ''
-    if (!html || html === '<p><br></p>') {
+    const markdown = window.editor.getMarkdown()
+    if (!markdown.trim()) {
       this.showToast('El contenido está vacío', 'error')
       return
     }
-
-    const markdown = new TurndownService().turndown(html)
 
     try {
       if (isNew) {
