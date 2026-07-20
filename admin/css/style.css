@@ -216,15 +216,6 @@ body {
 
 .editor-actions { display: flex; gap: 8px; margin-top: 20px; }
 
-/* Mermaid diagram blocks */
-pre.mermaid {
-  background: #f8f9fa;
-  border-radius: 6px;
-  padding: 16px;
-  overflow-x: auto;
-  text-align: center;
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .page-card { flex-direction: column; align-items: flex-start; gap: 10px; }

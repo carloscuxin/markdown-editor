@@ -100,20 +100,6 @@ const Pages = {
       usageStatistics: false
     })
 
-    mermaid.initialize({ startOnLoad: false, theme: 'default' })
-
-    window.editor.eventManager.listen('previewRenderAfter', (preview) => {
-      const els = preview._previewContent.querySelectorAll('pre > code.language-mermaid')
-      els.forEach(el => {
-        const pre = el.parentElement
-        if (pre.querySelector('svg')) return
-        const code = el.textContent
-        pre.textContent = code
-        pre.className = 'mermaid'
-      })
-      mermaid.run({ nodes: preview._previewContent.querySelectorAll('pre.mermaid') })
-    })
-
     window.editor.addHook('addImageBlobHook', async (blob, callback) => {
       try {
         const base64 = await Pages._blobToBase64(blob)
