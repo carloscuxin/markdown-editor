@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html><head>
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/2.5.4/toastui-editor.min.css" />
+<style>#editor-container{max-width:960px;margin:24px auto}</style>
 </head><body>
-<div id="editor"></div>
-<div id="result"></div>
+<div id="editor-container"></div>
+<div id="result" style="max-width:960px;margin:0 auto;padding:12px;font:14px sans-serif"></div>
 <script src="https://uicdn.toast.com/editor/2.5.4/toastui-editor-all.min.js"></script>
 <script>
-const r = document.getElementById('result')
-try {
-  const e = new toastui.Editor({
-    el: document.querySelector('#editor'),
-    initialEditType: 'wysiwyg',
-    height: '300px',
-  })
-  r.textContent = 'OK - editor created'
-  r.style.color = 'green'
-} catch (err) {
-  r.textContent = 'ERROR: ' + err.message
-  r.style.color = 'red'
+function test(label, opts) {
+  const el = document.getElementById('editor-container')
+  el.innerHTML = ''
+  try {
+    const e = new toastui.Editor({ el, ...opts })
+    return 'OK'
+  } catch (err) {
+    return 'ERROR: ' + err.message
+  }
 }
+
+const base = { initialEditType: 'wysiwyg', height: '600px' }
+const r = document.getElementById('result')
+let html = ''
+
+html += '<b>base</b>: ' + test('base', base) + '<br>'
+html += '<b>+placeholder</b>: ' + test('placeholder', { ...base, placeholder: 'test' }) + '<br>'
+html += '<b>+toolbar</b>: ' + test('toolbar', { ...base, toolbarItems: [['heading','bold','italic','strike'],['hr','quote','code','codeblock'],['ul','ol','task','indent','outdent'],['table','image','link']] }) + '<br>'
+html += '<b>+usageStats</b>: ' + test('usageStats', { ...base, usageStatistics: false }) + '<br>'
+html += '<b>+toolbar+usageStats</b>: ' + test('toolbar+usage', { ...base, toolbarItems: [['heading','bold','italic','strike'],['hr','quote','code','codeblock'],['ul','ol','task','indent','outdent'],['table','image','link']], usageStatistics: false }) + '<br>'
+
+r.innerHTML = html
 </script>
 </body></html>
