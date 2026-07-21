@@ -117,7 +117,9 @@ Principio:
 
 ```text
 Menos datos = menor consumo de recursos
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -172,7 +174,9 @@ flowchart LR
 A[Error]
 --> B[Retry]
 --> C[Reintento]
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -361,7 +365,9 @@ step.tasklet/
 
 util/
 util.impl/
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -373,7 +379,9 @@ batch.grid.size
 batch.block.size
 batch.chunk.size
 batch.skip.limit
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -435,7 +443,9 @@ Página 2 = 2,000
 Página 3 = 2,000
 Página 4 = 2,000
 Página 5 = 2,000
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -458,7 +468,9 @@ MASTER --> P1[Partition 1]
 MASTER --> P2[Partition 2]
 MASTER --> P3[Partition 3]
 MASTER --> P4[Partition 4]
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -526,7 +538,9 @@ D --> E[Continuar]
 
 ```text
 No exceder los núcleos disponibles del CPU.
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
@@ -649,7 +663,9 @@ Retry
 Skip
 Rollback
 Restart
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
+```
+
+[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
 
 ---
 
