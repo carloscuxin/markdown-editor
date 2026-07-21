@@ -177,7 +177,7 @@ const Pages = {
         const filename = `${timestamp}-${origName}`
 
         await API.uploadImage(filename, base64)
-        const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${filename}`
+        const url = `https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/uploads/${encodeURIComponent(filename)}`
 
         if (blob.type.startsWith('image/')) {
           callback(url, origName.replace(/\.[^.]+$/, ''))
