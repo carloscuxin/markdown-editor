@@ -27,7 +27,7 @@ const API = {
   async listPages() {
     const data = await this._request(this._repoURL('/wiki'))
     if (!Array.isArray(data)) return []
-    return data.filter(f => f.name.endsWith('.md') && f.type === 'file')
+    return data.filter(f => f.name.endsWith('.html') && f.type === 'file')
   },
 
   async getPage(filename) {
@@ -72,6 +72,32 @@ const API = {
         content,
         branch: 'main',
       }),
+    })
+  },
+
+  async getMeta() {
+    try {
+      const data = await this._request(this._repoURL('/wiki/_meta.json'))
+      return JSON.parse(atob(data.content.replace(/\n/g, '')))
+    } catch { return { pages: [] } }
+  },
+
+  async saveMeta(meta) {
+    const content = JSON.stringify(meta, null, 2)
+    let sha = null
+    try {
+      const existing = await this._request(this._repoURL('/wiki/_meta.json'))
+      sha = existing.sha
+    } catch {}
+    const payload = {
+      message: 'docs: actualiza page tree',
+      content: btoa(content),
+      branch: 'main',
+    }
+    if (sha) payload.sha = sha
+    return this._request(this._repoURL('/wiki/_meta.json'), {
+      method: 'PUT',
+      body: JSON.stringify(payload),
     })
   }
 }

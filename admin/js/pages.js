@@ -23,7 +23,7 @@ const Pages = {
       list.innerHTML = items.map(p => `
         <div class="page-card">
           <div class="page-info">
-            <h3>${p.name.replace('.md', '')}</h3>
+            <h3>${p.name.replace('.html', '')}</h3>
             <span class="page-meta">${p.name} · ${p.date}</span>
           </div>
           <div class="page-actions">
@@ -64,7 +64,7 @@ const Pages = {
     const isNew = !filename
 
     if (titleEl) {
-      titleEl.textContent = isNew ? 'Nueva página' : `Editando: ${filename.replace('.md', '')}`
+      titleEl.textContent = isNew ? 'Nueva página' : `Editando: ${filename.replace('.html', '')}`
     }
 
     if (isNew) {
@@ -74,7 +74,13 @@ const Pages = {
 
     try {
       const { content } = await API.getPage(filename)
-      this.initEditor(content)
+      const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
+      turndownService.keep((node) => node.classList &&
+        (node.classList.contains('callout') || node.classList.contains('tab-group') ||
+         node.classList.contains('tab-nav') || node.classList.contains('tab-content') ||
+         node.classList.contains('tab-btn') || node.classList.contains('toc') ||
+         node.classList.contains('mermaid')))
+      this.initEditor(turndownService.turndown(content))
     } catch (err) {
       this.showToast(`Error al cargar: ${err.message}`, 'error')
       this.initEditor('')
@@ -160,7 +166,7 @@ const Pages = {
         .replace(/[^a-z0-9áéíóúüñ\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '') + '.md'
+        .replace(/^-|-$/g, '') + '.html'
     }
 
     const markdown = window.editor.getMarkdown()
@@ -169,12 +175,17 @@ const Pages = {
       return
     }
 
+    const md = new markdownit({ html: true, breaks: true })
+    const htmlBody = md.render(markdown)
+    const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
+    const fullHtml = Pages.wrapInTemplate(htmlBody, { title, date: new Date().toLocaleDateString('es-ES') })
+
     try {
       if (isNew) {
-        await API.createPage(name, markdown)
+        await API.createPage(name, fullHtml)
       } else {
         const { sha } = await API.getPage(filename)
-        await API.savePage(name, markdown, sha)
+        await API.savePage(name, fullHtml, sha)
       }
       this.showToast('Página guardada correctamente', 'success')
       setTimeout(() => { window.location.href = 'dashboard.html' }, 1200)
@@ -233,5 +244,83 @@ const Pages = {
     if (event && event.target !== event.currentTarget) return
     const modal = document.getElementById('mermaid-modal')
     if (modal) modal.style.display = 'none'
+  },
+
+  wrapInTemplate(content, { title }) {
+    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + title + '</title>\n  <link rel="stylesheet" href="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/css/wiki.css">\n  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>\n</head>\n<body>\n  <header class="wiki-header">\n    <div class="wiki-header-inner">\n      <h1>Documentaci&oacute;n</h1>\n      <nav>\n        <a href="index.html">Inicio</a>\n        <a href="../admin/dashboard.html">Admin</a>\n      </nav>\n    </div>\n  </header>\n  <button class="wiki-sidebar-toggle">&#9776;</button>\n  <div class="wiki-layout">\n    <aside class="wiki-sidebar" id="wiki-sidebar">\n      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">\n      <nav class="wiki-tree" id="wiki-tree"></nav>\n    </aside>\n    <main class="wiki-content">\n      <h1 class="wiki-page-title">' + title + '</h1>\n      ' + content + '\n    </main>\n  </div>\n  <script src="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/js/wiki.js"><\/script>\n</body>\n</html>'
+  },
+
+  async loadTree() {
+    const container = document.getElementById('tree-container')
+    if (!container) return
+    try {
+      const meta = await API.getMeta()
+      Pages._renderTree(container, meta)
+    } catch (err) {
+      container.innerHTML = ''
+    }
+  },
+
+  _renderTree(container, meta) {
+    const pages = meta.pages || []
+    const dropState = { drag: null }
+
+    function findChildren(parent) {
+      return pages.filter(p => p.parent === parent).sort((a, b) => (a.order || 0) - (b.order || 0))
+    }
+
+    function buildHTML(name) {
+      const p = pages.find(p => p.name === name)
+      if (!p) return ''
+      const children = findChildren(name)
+      const title = p.title || name.replace('.html', '')
+      let html = '<div class="tree-item" draggable="true" data-name="' + name + '"'
+      html += ' ondragstart="event.dataTransfer.setData(\'text/plain\',\'' + name + '\')"'
+      html += ' ondragover="event.preventDefault(); event.target.closest(\'.tree-item\').classList.add(\'drag-over\')"'
+      html += ' ondragleave="event.target.closest(\'.tree-item\').classList.remove(\'drag-over\')"'
+      html += ' ondrop="Pages._onTreeDrop(event, \'' + name + '\')">'
+      html += '<span class="tree-drag-handle">&#9776;</span>'
+      html += '<a href="editor.html?file=' + encodeURIComponent(name) + '" class="tree-link">' + title + '</a>'
+      html += '</div>'
+      if (children.length) {
+        html += '<div class="tree-children">'
+        children.forEach(c => { html += buildHTML(c.name) })
+        html += '</div>'
+      }
+      return html
+    }
+
+    const roots = pages.filter(p => !p.parent)
+    if (roots.length === 0 && pages.length > 0) {
+      container.innerHTML = '<div class="tree-flat">' +
+        pages.map(p => '<div class="tree-item" draggable="true" data-name="' + p.name + '">' +
+          '<span class="tree-drag-handle">&#9776;</span>' +
+          '<a href="editor.html?file=' + encodeURIComponent(p.name) + '" class="tree-link">' +
+          (p.title || p.name.replace('.html', '')) + '</a></div>').join('') + '</div>'
+    } else {
+      container.innerHTML = '<div class="tree-roots">' +
+        roots.map(r => buildHTML(r.name)).join('') + '</div>'
+    }
+  },
+
+  async _onTreeDrop(event, targetName) {
+    event.preventDefault()
+    event.target.closest('.tree-item')?.classList.remove('drag-over')
+    const draggedName = event.dataTransfer.getData('text/plain')
+    if (!draggedName || draggedName === targetName) return
+
+    try {
+      const meta = await API.getMeta()
+      const pages = meta.pages || []
+      const dragged = pages.find(p => p.name === draggedName)
+      if (!dragged) return
+
+      dragged.parent = targetName
+      await API.saveMeta(meta)
+      Pages.loadTree()
+      Pages.showToast('Jerarquía actualizada', 'success')
+    } catch (err) {
+      Pages.showToast('Error al guardar tree: ' + err.message, 'error')
+    }
   }
 }

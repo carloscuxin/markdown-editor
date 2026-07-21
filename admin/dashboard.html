@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Páginas</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="../assets/css/wiki.css" />
 </head>
 <body>
   <header class="app-header">
@@ -12,18 +13,30 @@
     <div class="user-info" id="user-info"></div>
   </header>
 
-  <main class="app-main">
-    <div class="dashboard-header">
-      <h2>Páginas</h2>
-      <a href="editor.html" class="btn btn-primary">+ Nueva página</a>
-    </div>
+  <div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+      <div class="tree-header">
+        <h3>Page Tree</h3>
+        <button class="btn btn-sm" onclick="Pages.loadTree()" title="Refrescar">↻</button>
+      </div>
+      <div id="tree-container" class="tree-container">
+        <div class="loading">Cargando árbol...</div>
+      </div>
+    </aside>
 
-    <div id="empty-state" class="empty-state" style="display:none">
-      <p>No hay páginas todavía. Crea la primera.</p>
-    </div>
+    <main class="dashboard-main">
+      <div class="dashboard-header">
+        <h2>Páginas</h2>
+        <a href="editor.html" class="btn btn-primary">+ Nueva página</a>
+      </div>
 
-    <div id="pages-list"></div>
-  </main>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <p>No hay páginas todavía. Crea la primera.</p>
+      </div>
+
+      <div id="pages-list"></div>
+    </main>
+  </div>
 
   <div id="toast" class="toast"></div>
 
@@ -43,6 +56,7 @@
       `
 
       await Pages.loadDashboard()
+      await Pages.loadTree()
     })()
   </script>
 </body>
