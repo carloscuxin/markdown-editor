@@ -100,14 +100,12 @@ const Editor = {
     const newNavInput = document.getElementById('new-nav-input')
     navSelect.innerHTML = '<option value="">Sección*</option>'
     newNavInput.style.display = 'none'
-    newNavInput.value = ''
+    navSelect.value = ''
 
     if (!domain) return
 
-    console.log('Updating sections for domain:', domain)
-    console.log('Available domains:', Object.keys(this._navStructure))
-    const sections = this._navStructure[domain] || {}
-    console.log('Sections found:', Object.keys(sections))
+    const sections = this._navStructure[domain] || this._navStructure[domain.charAt(0).toUpperCase() + domain.slice(1)] || {}
+    console.log('Sections for', domain, ':', Object.keys(sections))
     for (const section of Object.keys(sections)) {
       const opt = document.createElement('option')
       opt.value = section
