@@ -34,7 +34,8 @@
         <h2>Páginas</h2>
         <div style="display:flex;gap:6px">
           <a href="editor.html" class="btn btn-primary">+ Nueva página</a>
-          <button class="btn btn-sm" onclick="Pages.regenerateIndex().then(() => Pages.showToast('Index regenerado', 'success'))" title="Regenerar wiki/index.html">&#8635; Index</button>
+          <button class="btn btn-sm" onclick="Pages.syncMeta().then(n => Pages.showToast('Sincronizado: ' + (n||0) + ' páginas', 'success')).catch(e => Pages.showToast('Error: ' + e.message, 'error')); Pages.loadDashboard(); Pages.loadTree()" title="Sincronizar meta con páginas existentes">&#8635; Sync</button>
+          <button class="btn btn-sm" onclick="Pages.regenerateIndex().then(() => Pages.showToast('Index regenerado', 'success'))" title="Regenerar wiki/index.html">Index</button>
           <a href="../wiki/index.html" class="btn btn-sm" target="_blank" title="Ver wiki publicada">Ver wiki</a>
         </div>
       </div>

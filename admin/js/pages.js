@@ -113,11 +113,54 @@ const Pages = {
     try {
       const { sha } = await API.getPage(filename)
       await API.deletePage(filename, sha)
+      await Pages._removeFromMeta(filename)
       this.showToast('Página eliminada', 'success')
       Pages.regenerateIndex()
       this.loadDashboard()
     } catch (err) {
       this.showToast(`Error: ${err.message}`, 'error')
+    }
+  },
+
+  async _addToMeta(filename, title) {
+    try {
+      const meta = await API.getMeta()
+      meta.pages = meta.pages || []
+      if (meta.pages.some(p => p.name === filename)) return
+      meta.pages.push({ name: filename, title, parent: null, order: meta.pages.length })
+      await API.saveMeta(meta)
+    } catch (e) {}
+  },
+
+  async _removeFromMeta(filename) {
+    try {
+      const meta = await API.getMeta()
+      meta.pages = meta.pages || []
+      meta.pages = meta.pages.filter(p => p.name !== filename)
+      meta.pages.forEach((p, i) => { p.order = i })
+      await API.saveMeta(meta)
+    } catch (e) {}
+  },
+
+  async syncMeta() {
+    try {
+      const files = await API.listPages()
+      const meta = await API.getMeta()
+      meta.pages = meta.pages || []
+      const existing = new Set(meta.pages.map(p => p.name))
+      let added = 0
+      files.forEach(f => {
+        if (f.name === 'index.html') return
+        if (existing.has(f.name)) return
+        meta.pages.push({ name: f.name, title: f.name.replace('.html', ''), parent: null, order: meta.pages.length })
+        added++
+      })
+      meta.pages = meta.pages.filter(p => files.some(f => f.name === p.name) || p.name === 'index.html')
+      meta.pages.forEach((p, i) => { p.order = i })
+      await API.saveMeta(meta)
+      return added
+    } catch (e) {
+      throw e
     }
   },
 
@@ -257,6 +300,7 @@ const Pages = {
     try {
       if (isNew) {
         await API.createPage(name, fullHtml)
+        await Pages._addToMeta(name, titleInput?.value || '')
       } else {
         const { sha } = await API.getPage(filename)
         await API.savePage(name, fullHtml, sha)
