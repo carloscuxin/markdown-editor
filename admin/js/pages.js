@@ -249,7 +249,7 @@ const Pages = {
   },
 
   wrapInTemplate(content, { title }) {
-    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + title + '</title>\n  <link rel="stylesheet" href="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/css/wiki.css">\n  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>\n</head>\n<body>\n  <header class="wiki-header">\n    <div class="wiki-header-inner">\n      <h1>Documentaci&oacute;n</h1>\n      <nav>\n        <a href="index.html">Inicio</a>\n        <a href="../admin/dashboard.html">Admin</a>\n      </nav>\n    </div>\n  </header>\n  <button class="wiki-sidebar-toggle">&#9776;</button>\n  <div class="wiki-layout">\n    <aside class="wiki-sidebar" id="wiki-sidebar">\n      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">\n      <nav class="wiki-tree" id="wiki-tree"></nav>\n    </aside>\n    <main class="wiki-content">\n      <h1 class="wiki-page-title">' + title + '</h1>\n      ' + content + '\n    </main>\n  </div>\n  <script src="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/js/wiki.js"><\/script>\n</body>\n</html>'
+    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + title + '</title>\n  <link rel="stylesheet" href="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/css/wiki.css">\n  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>\n</head>\n<body>\n  <header class="wiki-header">\n    <div class="wiki-header-inner">\n      <h1>Documentaci&oacute;n</h1>\n      <nav>\n        <a href="index.html">Inicio</a>\n        <a href="../admin/dashboard.html">Admin</a>\n      </nav>\n    </div>\n  </header>\n  <button class="wiki-sidebar-toggle">&#9776;</button>\n  <div class="wiki-layout">\n    <aside class="wiki-sidebar" id="wiki-sidebar">\n      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">\n      <nav class="wiki-tree" id="wiki-tree"></nav>\n    </aside>\n    <main class="wiki-content">\n      <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>\n      <h1 class="wiki-page-title">' + title + '</h1>\n      ' + content + '\n      <nav class="wiki-prevnext" id="wiki-prevnext"></nav>\n    </main>\n  </div>\n  <script src="https://raw.githubusercontent.com/carloscuxin/markdown-editor/main/assets/js/wiki.js"><\/script>\n</body>\n</html>'
   },
 
   async loadTree() {
@@ -265,64 +265,163 @@ const Pages = {
 
   _renderTree(container, meta) {
     const pages = meta.pages || []
-    const dropState = { drag: null }
+    container.innerHTML = ''
 
     function findChildren(parent) {
       return pages.filter(p => p.parent === parent).sort((a, b) => (a.order || 0) - (b.order || 0))
     }
 
-    function buildHTML(name) {
-      const p = pages.find(p => p.name === name)
-      if (!p) return ''
-      const children = findChildren(name)
-      const title = p.title || name.replace('.html', '')
-      let html = '<div class="tree-item" draggable="true" data-name="' + name + '"'
-      html += ' ondragstart="event.dataTransfer.setData(\'text/plain\',\'' + name + '\')"'
-      html += ' ondragover="event.preventDefault(); event.target.closest(\'.tree-item\').classList.add(\'drag-over\')"'
-      html += ' ondragleave="event.target.closest(\'.tree-item\').classList.remove(\'drag-over\')"'
-      html += ' ondrop="Pages._onTreeDrop(event, \'' + name + '\')">'
-      html += '<span class="tree-drag-handle">&#9776;</span>'
-      html += '<a href="editor.html?file=' + encodeURIComponent(name) + '" class="tree-link">' + title + '</a>'
-      html += '</div>'
-      if (children.length) {
-        html += '<div class="tree-children">'
-        children.forEach(c => { html += buildHTML(c.name) })
-        html += '</div>'
-      }
-      return html
+    function createItem(p, level) {
+      const div = document.createElement('div')
+      div.className = 'tree-item'
+      div.draggable = true
+      div.dataset.name = p.name
+      div.style.paddingLeft = (12 * level + 4) + 'px'
+
+      div.innerHTML = '<span class="tree-drag-handle">&#9776;</span>' +
+        '<a href="editor.html?file=' + encodeURIComponent(p.name) + '" class="tree-link">' +
+        (p.title || p.name.replace('.html', '')) + '</a>'
+
+      div.addEventListener('dragstart', function (e) {
+        e.dataTransfer.setData('text/plain', p.name)
+        e.dataTransfer.effectAllowed = 'move'
+        div.classList.add('dragging')
+      })
+
+      div.addEventListener('dragend', function () {
+        div.classList.remove('dragging')
+        clearIndicators()
+      })
+
+      div.addEventListener('dragover', function (e) {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+        clearIndicators()
+        const rect = div.getBoundingClientRect()
+        const y = e.clientY - rect.top
+        const h = rect.height
+        if (y < h / 4) {
+          div.classList.add('drop-above')
+        } else if (y > h * 3/4) {
+          div.classList.add('drop-below')
+        } else {
+          div.classList.add('drop-child')
+        }
+      })
+
+      div.addEventListener('dragleave', function () {
+        div.classList.remove('drop-above', 'drop-below', 'drop-child')
+      })
+
+      div.addEventListener('drop', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        clearIndicators()
+        var dragged = e.dataTransfer.getData('text/plain')
+        var rect = div.getBoundingClientRect()
+        var y = e.clientY - rect.top
+        var h = rect.height
+        var pos = y < h / 4 ? 'before' : (y > h * 3/4 ? 'after' : 'child')
+        Pages._applyTreeDrop(dragged, p.name, pos, meta)
+      })
+
+      return div
     }
 
-    const roots = pages.filter(p => !p.parent)
+    function clearIndicators() {
+      container.querySelectorAll('.drop-above, .drop-below, .drop-child').forEach(function (el) {
+        el.classList.remove('drop-above', 'drop-below', 'drop-child')
+      })
+    }
+
+    // Root drop zone
+    var rootZone = document.createElement('div')
+    rootZone.className = 'tree-root-zone'
+    rootZone.innerHTML = '<span class="tree-root-label">Raiz (sin padre)</span>'
+    rootZone.addEventListener('dragover', function (e) {
+      e.preventDefault()
+      rootZone.classList.add('drop-zone-active')
+    })
+    rootZone.addEventListener('dragleave', function () {
+      rootZone.classList.remove('drop-zone-active')
+    })
+    rootZone.addEventListener('drop', function (e) {
+      e.preventDefault()
+      rootZone.classList.remove('drop-zone-active')
+      var dragged = e.dataTransfer.getData('text/plain')
+      Pages._applyTreeDrop(dragged, null, 'root', meta)
+    })
+    container.appendChild(rootZone)
+
+    function renderChildren(parent, level) {
+      var children = findChildren(parent)
+      children.forEach(function (p) {
+        container.appendChild(createItem(p, level))
+        var grandChildren = findChildren(p.name)
+        if (grandChildren.length) renderChildren(p.name, level + 1)
+      })
+    }
+
+    var roots = pages.filter(function (p) { return !p.parent })
     if (roots.length === 0 && pages.length > 0) {
-      container.innerHTML = '<div class="tree-flat">' +
-        pages.map(p => '<div class="tree-item" draggable="true" data-name="' + p.name + '">' +
-          '<span class="tree-drag-handle">&#9776;</span>' +
-          '<a href="editor.html?file=' + encodeURIComponent(p.name) + '" class="tree-link">' +
-          (p.title || p.name.replace('.html', '')) + '</a></div>').join('') + '</div>'
+      pages.forEach(function (p) { container.appendChild(createItem(p, 0)) })
     } else {
-      container.innerHTML = '<div class="tree-roots">' +
-        roots.map(r => buildHTML(r.name)).join('') + '</div>'
+      roots.forEach(function (r) {
+        container.appendChild(createItem(r, 0))
+        var children = findChildren(r.name)
+        if (children.length) renderChildren(r.name, 1)
+      })
     }
   },
 
-  async _onTreeDrop(event, targetName) {
-    event.preventDefault()
-    event.target.closest('.tree-item')?.classList.remove('drag-over')
-    const draggedName = event.dataTransfer.getData('text/plain')
+  async _applyTreeDrop(draggedName, targetName, position, meta) {
     if (!draggedName || draggedName === targetName) return
+    var pages = meta.pages || []
+    var dragged = pages.find(function (p) { return p.name === draggedName })
+    if (!dragged) return
+
+    // Remove from current parent's children order
+    var oldParent = dragged.parent || null
+    if (position === 'root') {
+      dragged.parent = null
+      var rootPages = pages.filter(function (p) { return !p.parent })
+      var rootIdx = rootPages.indexOf(dragged)
+      if (rootIdx >= 0) { rootPages.splice(rootIdx, 1); rootPages.push(dragged) }
+      rootPages.forEach(function (p, i) { p.order = i })
+    } else if (position === 'before' || position === 'after') {
+      var target = pages.find(function (p) { return p.name === targetName })
+      if (!target) return
+      dragged.parent = target.parent || null
+    } else if (position === 'child') {
+      dragged.parent = targetName
+    }
+
+    // Reorder: set order values so dragged appears where expected
+    var siblings = pages.filter(function (p) { return p.parent === dragged.parent })
+    siblings.forEach(function (p, i) { p.order = i })
+    if (position === 'before' || position === 'after' || position === 'child') {
+      var target = pages.find(function (p) { return p.name === targetName })
+      var targetIdx = siblings.indexOf(target)
+      var draggedIdx = siblings.indexOf(dragged)
+      if (position === 'before') {
+        // Move dragged before target
+        siblings.splice(draggedIdx, 1)
+        var newIdx = siblings.indexOf(target)
+        siblings.splice(newIdx, 0, dragged)
+      } else if (position === 'after') {
+        siblings.splice(draggedIdx, 1)
+        var newAfterIdx = siblings.indexOf(target) + 1
+        siblings.splice(newAfterIdx, 0, dragged)
+      }
+      siblings.forEach(function (p, i) { p.order = i })
+    }
 
     try {
-      const meta = await API.getMeta()
-      const pages = meta.pages || []
-      const dragged = pages.find(p => p.name === draggedName)
-      if (!dragged) return
-
-      dragged.parent = targetName
       await API.saveMeta(meta)
       Pages.loadTree()
-      Pages.showToast('Jerarquía actualizada', 'success')
+      Pages.showToast('Jerarquia actualizada', 'success')
     } catch (err) {
-      Pages.showToast('Error al guardar tree: ' + err.message, 'error')
+      Pages.showToast('Error: ' + err.message, 'error')
     }
   },
 

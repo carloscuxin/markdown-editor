@@ -68,11 +68,30 @@ body {
   transition: background .1s;
 }
 .tree-item:hover { background: var(--bg); }
-.tree-item.drag-over { background: rgba(45,126,233,.1); outline: 2px dashed var(--primary); border-radius: 4px; }
+.tree-item.dragging { opacity: 0.3; }
+.tree-item.drop-above { border-top: 2px solid var(--primary); margin-top: -1px; }
+.tree-item.drop-below { border-bottom: 2px solid var(--primary); margin-bottom: -1px; }
+.tree-item.drop-child { background: rgba(45,126,233,.12); border-radius: 4px; }
 .tree-drag-handle { color: var(--text-secondary); font-size: 12px; cursor: grab; user-select: none; }
 .tree-link { color: var(--text); text-decoration: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tree-link:hover { color: var(--primary); }
-.tree-children { padding-left: 12px; }
+
+.tree-root-zone {
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  transition: background .15s;
+}
+.tree-root-zone.drop-zone-active {
+  background: rgba(45,126,233,.08);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.tree-root-label { }
 
 /* Callouts (editor preview) */
 .callout {
