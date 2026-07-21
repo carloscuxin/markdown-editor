@@ -560,7 +560,7 @@ const Pages = {
 
   async regenerateIndex() {
     try {
-      var content = ''
+      var content = '<div class="wiki-index" id="wiki-index"></div>'
 
       const fullHtml = Pages.wrapInTemplate(content, { title: 'Inicio' })
       let sha = null

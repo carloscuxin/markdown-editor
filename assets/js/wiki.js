@@ -212,6 +212,24 @@
     }
   }
 
+  // Index page
+  function renderIndex() {
+    var el = document.getElementById('wiki-index')
+    if (!el) return
+    var pages = (meta.pages || []).filter(function (p) { return p.name !== 'index.html' })
+    if (pages.length === 0) {
+      el.innerHTML = '<p class="wiki-index-desc">No hay p&aacute;ginas en la documentaci&oacute;n</p>'
+      return
+    }
+    pages.sort(function (a, b) { return (a.title || a.name).localeCompare(b.title || b.name) })
+    var html = '<p class="wiki-index-desc">' + pages.length + ' p&aacute;ginas en la documentaci&oacute;n</p><ul class="index-list" style="padding-left:16px">'
+    pages.forEach(function (p) {
+      html += '<li class="index-item"><a href="' + p.name + '" class="index-link">' + (p.title || p.name.replace('.html', '')) + '</a></li>'
+    })
+    html += '</ul>'
+    el.innerHTML = html
+  }
+
   // Init
   initMobileSidebar()
 
@@ -230,6 +248,7 @@
       renderTree()
       renderBreadcrumb()
       renderPrevNext()
+      renderIndex()
       initTOC()
       initMermaid()
     })
