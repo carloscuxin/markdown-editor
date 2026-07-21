@@ -4,13 +4,13 @@
       "name": "wiki-test.html",
       "title": "Wiki test",
       "parent": null,
-      "order": 0
+      "order": 1
     },
     {
       "name": "wiki.html",
       "title": "Wiki",
       "parent": null,
-      "order": 1
+      "order": 0
     }
   ]
 }
