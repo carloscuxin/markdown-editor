@@ -51,9 +51,7 @@ const Editor = {
       this._mkdocsSha = sha
       this._mkdocsContent = content
       this._navStructure = this._parseNav(content)
-      console.log('Nav structure:', this._navStructure)
     } catch (err) {
-      console.error('Error loading nav:', err)
       this._navStructure = {
         'Agile': { 'Overview': true, 'Epics': true, 'User Stories': true, 'Business Requirements': true, 'Release Notes': true, 'Reports': true, 'Meeting Notes': true },
         'Technical': { 'Overview': true, 'API': true, 'Architecture': true, 'ADRs': true, 'Runbooks': true, 'Batch Processing': true },
@@ -105,7 +103,6 @@ const Editor = {
     if (!domain) return
 
     const sections = this._navStructure[domain] || this._navStructure[domain.charAt(0).toUpperCase() + domain.slice(1)] || {}
-    console.log('Sections for', domain, ':', Object.keys(sections))
     for (const section of Object.keys(sections)) {
       const opt = document.createElement('option')
       opt.value = section
