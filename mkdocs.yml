@@ -139,6 +139,8 @@ nav:
       - technical/adrs/index.md
     - Runbooks:
       - technical/runbooks/index.md
+    - Batch Processing:
+      - "Playbook v1.1.0": technical/playbook-batch-processing-v110-resumen-ejecutivo-y-estandar-.md
   # --- User Guides ---
   - User Guides:
     - Overview: user-guides/index.md
