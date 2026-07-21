@@ -11,6 +11,12 @@
       "title": "wiki all",
       "parent": null,
       "order": 1
+    },
+    {
+      "name": "blockcode.html",
+      "title": "blockcode",
+      "parent": null,
+      "order": 2
     }
   ]
 }
