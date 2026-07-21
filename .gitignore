@@ -17,5 +17,5 @@ npm-debug.log*
 # MkDocs build output
 site/
 
-# Planes locales (sin commit)
-plans/
+# Superpowers (planes/specs internos, no parte del sitio)
+docs/superpowers/
