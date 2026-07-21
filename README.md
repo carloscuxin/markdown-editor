@@ -1,65 +1,48 @@
-# Markdown Wiki Editor
+# Enterprise Documentation
 
-Editor visual para gestionar documentación técnica directamente en un repositorio GitHub.
-
-## Cómo funciona
-
-El panel admin (`admin/`) se conecta a la API de GitHub con un token personal. Cada página se guarda como `.html` renderizado en `wiki/` y su correspondiente `.md` raw para visualización en GitHub. El contenido se edita con [Toast UI Editor](https://ui.toast.com/tui-editor) (WYSIWYG + Markdown).
+Space de documentación empresarial con editor integrado.
 
 ## Estructura
 
 ```
-admin/
-├── index.html        → Redirige a dashboard o login
-├── dashboard.html    → Panel con árbol de páginas y administración
-├── editor.html       → Editor de contenido
-├── login.html        → Autenticación con token de GitHub
+docs/
+├── admin/
+│   ├── editor.html       → Editor de contenido (Toast UI)
+│   └── login.html        → Autenticación con token de GitHub
 ├── js/
-│   ├── auth.js       → Manejo de token (localStorage + validación con API)
-│   ├── api.js        → Cliente para GitHub Contents API
-│   └── pages.js      → Lógica del editor, renderizado y persistencia
-├── css/
-│   └── style.css
-```
-
-```
-wiki/                 → Páginas publicadas (.html + .md)
-assets/
-├── css/wiki.css      → Estilos de la wiki pública
-├── js/wiki.js        → Sidebar, árbol, búsqueda, TOC, Mermaid
-└── uploads/          → Imágenes y archivos subidos
+│   ├── auth.js           → Manejo de token (localStorage)
+│   ├── api.js            → Cliente para GitHub Contents API
+│   └── editor.js         → Lógica del editor
+├── stylesheets/
+│   ├── admin.css         → Estilos del editor
+│   └── extra.css         → Estilos del sitio
+├── agile/                → Documentación ágil
+├── technical/            → Documentación técnica
+├── user-guides/          → Guías de usuario
+└── doc-templates/        → Plantillas de documentos
 ```
 
 ## Uso
 
 1. Clona el repo y activa GitHub Pages desde `main`.
-2. Abre `https://<tu-user>.github.io/markdown-editor/`.
-3. Si hay token guardado → redirige a la wiki. Si no → al login.
-4. Genera un [token clásico](https://github.com/settings/tokens) con permiso `repo`.
-5. En el panel admin puedes crear, editar, reordenar y eliminar páginas.
+2. Abre `https://<tu-user>.github.io/markdown-editor/admin/editor.html`.
+3. Ingresa tu token de GitHub (clásico, permiso `repo`).
+4. Selecciona dominio, escribe contenido y guarda.
 
-## Funcionalidades
+## Editor
 
-- Editor WYSIWYG con Toast UI
-- Tablas, listas, blockquotes, código, imágenes
-- Callouts (info/warning/danger/success)
-- Pestañas (tabs)
-- Diagramas Mermaid
-- Tabla de contenido automática (TOC)
-- Búsqueda en el sidebar
-- Breadcrumb y navegación prev/next
-- Árbol jerárquico drag & drop
-- Preservación de markdown original en el HTML
-- Archivos `.md` para visualización en GitHub
-- Validación de sesión en cada página y en cada llamada API
+- WYSIWYG + Markdown (Toast UI Editor)
+- Plantillas: Epic, User Story, BRD, Release Note, ADR, Meeting Notes
+- Guardado directo en `docs/` vía GitHub API
+- Borradores locales (localStorage)
+- Preview integrado
 
 ## Tecnologías
 
-- HTML5 / CSS3 / JavaScript vanilla
-- [Toast UI Editor](https://ui.toast.com/tui-editor)
-- [markdown-it](https://github.com/markdown-it/markdown-it)
-- [Mermaid](https://mermaid.js.org/)
+- MkDocs + Material Theme
+- Toast UI Editor
 - GitHub Contents API
 
 ---
 
+**Desarrollado por:** Carlos Cuxin
