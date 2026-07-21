@@ -95,6 +95,43 @@ body {
 .tab-content { display: none; padding: 16px 20px; }
 .tab-content.active { display: block; }
 
+/* Insert panel (below toolbar) */
+.insert-panel {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.insert-panel button {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  transition: background .15s, color .15s;
+}
+.insert-panel button:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.insert-panel .ip-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 2px;
+}
+.insert-panel .ip-label {
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 4px;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

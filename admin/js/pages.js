@@ -106,6 +106,8 @@ const Pages = {
       usageStatistics: false
     })
 
+    Pages._createInsertPanel()
+
     window.editor.addHook('addImageBlobHook', async (blob, callback) => {
       try {
         const base64 = await Pages._blobToBase64(blob)
@@ -321,6 +323,103 @@ const Pages = {
       Pages.showToast('Jerarquía actualizada', 'success')
     } catch (err) {
       Pages.showToast('Error al guardar tree: ' + err.message, 'error')
+    }
+  },
+
+  _createInsertPanel() {
+    const container = document.querySelector('#editor-container')
+    if (!container) return
+    const panel = document.createElement('div')
+    panel.className = 'insert-panel'
+    panel.innerHTML = [
+      '<span class="ip-label">Insertar:</span>',
+      '<button onclick="Pages.insertCallout(\'info\')" title="Callout informativo">Info</button>',
+      '<button onclick="Pages.insertCallout(\'warning\')" title="Callout de advertencia">Warn</button>',
+      '<button onclick="Pages.insertCallout(\'danger\')" title="Callout de peligro">Danger</button>',
+      '<button onclick="Pages.insertCallout(\'success\')" title="Callout de exito">Success</button>',
+      '<span class="ip-divider"></span>',
+      '<button onclick="Pages.insertTabs()" title="Insertar tabs">Tabs</button>',
+      '<button onclick="Pages.insertTOC()" title="Insertar tabla de contenido">TOC</button>',
+      '<button onclick="Pages.insertMermaid()" title="Insertar diagrama Mermaid">Mermaid</button>',
+      '<span class="ip-divider"></span>',
+      '<button onclick="Pages.insertTemplate(\'page\')" title="Plantilla de pagina">Pagina</button>',
+      '<button onclick="Pages.insertTemplate(\'api\')" title="Plantilla API">API</button>',
+      '<button onclick="Pages.insertTemplate(\'guide\')" title="Plantilla guia">Guia</button>'
+    ].join('')
+
+    const toolbar = container.querySelector('.toastui-editor-defaultUI-toolbar')
+    if (toolbar) {
+      toolbar.insertAdjacentElement('afterend', panel)
+    } else {
+      container.appendChild(panel)
+    }
+  },
+
+  _insertContent(text) {
+    const editor = window.editor
+    if (!editor) return
+    if (editor.getCurrentMode() === 'wysiwyg') {
+      const squire = editor.getCurrentModeEditor().getEditor()
+      if (squire.insertHTML) {
+        squire.insertHTML(text)
+        squire.focus()
+      }
+    } else {
+      const mdEditor = editor.getCurrentModeEditor()
+      if (mdEditor.replaceSelection) {
+        mdEditor.replaceSelection(text)
+        mdEditor.focus()
+      }
+    }
+  },
+
+  insertCallout(type) {
+    const html = '<div class="callout callout-' + type + '">Escribe el contenido aqu&iacute;...</div><p><br></p>'
+    this._insertContent(html)
+  },
+
+  insertTabs() {
+    const html = '<div class="tab-group"><div class="tab-nav"><button type="button" class="tab-btn active" data-tab="tab1">Pesta&ntilde;a 1</button><button type="button" class="tab-btn" data-tab="tab2">Pesta&ntilde;a 2</button></div><div class="tab-content active" data-tab="tab1">Contenido de la pesta&ntilde;a 1</div><div class="tab-content" data-tab="tab2">Contenido de la pesta&ntilde;a 2</div></div><p><br></p>'
+    this._insertContent(html)
+  },
+
+  insertTOC() {
+    const html = '<nav class="toc"><h4>Tabla de Contenido</h4></nav><p><br></p>'
+    this._insertContent(html)
+  },
+
+  insertMermaid() {
+    const code = 'flowchart TD\n    A[Inicio] --> B[Proceso]\n    B --> C[Fin]'
+    if (window.editor.getCurrentMode() === 'wysiwyg') {
+      var pre = document.createElement('pre')
+      var codeEl = document.createElement('code')
+      codeEl.className = 'language-mermaid'
+      codeEl.textContent = code
+      pre.appendChild(codeEl)
+      var container = document.createElement('p')
+      container.appendChild(pre)
+      container.appendChild(document.createElement('br'))
+      this._insertContent(container.outerHTML)
+    } else {
+      this._insertContent('\n```mermaid\n' + code + '\n```\n')
+    }
+  },
+
+  insertTemplate(type) {
+    const templates = {
+      page: '# T&iacute;tulo de la p&aacute;gina\n\n## Descripci&oacute;n\n\nDescribe el prop&oacute;sito de esta p&aacute;gina.\n\n## Detalles\n\nContenido principal aqu&iacute;.\n\n## Referencias\n\n- [Enlace](url)',
+      api: '# API Reference\n\n## Endpoint\n\n`GET /api/v1/resource`\n\n## Par&aacute;metros\n\n| Param | Tipo | Descripci&oacute;n |\n|-------|------|-----------------|\n| `id` | string | Identificador |\n\n## Respuesta\n\n```json\n{\n  "status": "ok",\n  "data": {}\n}\n```\n\n## Errores\n\n| C&oacute;digo | Descripci&oacute;n |\n|---------|-------------|\n| 400 | Bad Request |\n| 401 | No autorizado |',
+      guide: '# Gu&iacute;a: T&iacute;tulo\n\n## Prerrequisitos\n\n- Requisito 1\n- Requisito 2\n\n## Paso 1: T&iacute;tulo del paso\n\nInstrucciones detalladas.\n\n## Paso 2: T&iacute;tulo del paso\n\nM&aacute;s instrucciones.\n\n## Resoluci&oacute;n de problemas\n\n### Error com&uacute;n\n\nSoluci&oacute;n al problema.\n\n## Siguientes pasos\n\n- [ ] Tarea pendiente\n- [x] Tarea completada'
+    }
+
+    const markdown = templates[type] || ''
+    if (!markdown) return
+
+    if (window.editor.getCurrentMode() === 'wysiwyg') {
+      const md = new markdownit({ html: true, breaks: true })
+      this._insertContent(md.render(markdown))
+    } else {
+      this._insertContent('\n' + markdown + '\n')
     }
   }
 }

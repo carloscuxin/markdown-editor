@@ -111,9 +111,44 @@
   }
 
   // Mermaid
-  if (typeof mermaid !== 'undefined') {
-    mermaid.initialize({ startOnLoad: true, theme: 'default' })
+  function initMermaid() {
+    // Convert <pre><code class="language-mermaid"> to <div class="mermaid">
+    document.querySelectorAll('pre > code.language-mermaid').forEach(function (code) {
+      var div = document.createElement('div')
+      div.className = 'mermaid'
+      div.textContent = code.textContent
+      code.parentElement.replaceWith(div)
+    })
+    if (typeof mermaid !== 'undefined') {
+      mermaid.initialize({ startOnLoad: true, theme: 'default' })
+    }
   }
+
+  // TOC auto-generate
+  function initTOC() {
+    var tocContainers = document.querySelectorAll('nav.toc')
+    tocContainers.forEach(function (nav) {
+      if (nav.children.length > 1) return // already has content
+      var headings = document.querySelectorAll('.wiki-content h2, .wiki-content h3, .wiki-content h4')
+      if (headings.length === 0) return
+
+      var h4 = nav.querySelector('h4')
+      var list = document.createElement('div')
+      headings.forEach(function (h) {
+        var id = h.id || h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        h.id = id
+        var a = document.createElement('a')
+        a.href = '#' + id
+        a.textContent = h.textContent
+        a.className = 'toc-' + h.tagName.toLowerCase()
+        list.appendChild(a)
+      })
+      nav.appendChild(list)
+    })
+  }
+
+  initMermaid()
+  initTOC()
 
   // Sidebar toggle for mobile
   var toggleBtn = document.querySelector('.wiki-sidebar-toggle')
