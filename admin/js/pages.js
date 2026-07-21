@@ -117,6 +117,12 @@ const Pages = {
     try {
       const { sha } = await API.getPage(filename)
       await API.deletePage(filename, sha)
+      // Delete .md version too
+      try {
+        const mdName = filename.replace('.html', '.md')
+        var { sha: mdSha } = await API.getPage(mdName)
+        await API.deletePage(mdName, mdSha)
+      } catch (_) {}
       await Pages._removeFromMeta(filename)
       this.showToast('Página eliminada', 'success')
       Pages.regenerateIndex()
@@ -296,15 +302,9 @@ const Pages = {
       return
     }
 
-    const md = new markdownit({ html: true })
+    const md = new markdownit({ html: true, breaks: true, linkify: true })
     let htmlBody = md.render(markdown)
 
-    // Fix fenced code blocks that markdown-it might not convert
-    htmlBody = htmlBody.replace(/```(\w*)\n([\s\S]*?)```/g, function (match, lang, code) {
-      var langClass = lang ? ' class="language-' + lang + '"' : ''
-      var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      return '<pre><code' + langClass + '>' + escaped + '</code></pre>'
-    })
     const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
     const fullHtml = Pages.wrapInTemplate(htmlBody, { title, markdown })
 
@@ -316,6 +316,15 @@ const Pages = {
         const { sha } = await API.getPage(filename)
         await API.savePage(name, fullHtml, sha)
       }
+
+      // Save .md for GitHub viewing
+      try {
+        const mdName = name.replace('.html', '.md')
+        var mdSha = null
+        try { var m = await API.getPage(mdName); mdSha = m.sha } catch (_) {}
+        await API.savePage(mdName, markdown, mdSha)
+      } catch (_) {}
+
       this.showToast('Página guardada correctamente', 'success')
       Pages.regenerateIndex()
       setTimeout(() => { window.location.href = 'dashboard.html' }, 1200)
