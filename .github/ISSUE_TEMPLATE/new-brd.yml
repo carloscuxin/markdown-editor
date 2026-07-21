@@ -1,0 +1,70 @@
+name: New BRD
+description: Create a new Business Requirements Document
+title: "[BRD] "
+labels: ["documentation", "brd"]
+body:
+  - type: input
+    id: brd-id
+    attributes:
+      label: BRD ID
+      description: "BRD-YYYY-###"
+      placeholder: "BRD-2026-015"
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      placeholder: "Push Notifications"
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      placeholder: "S. Chen (Business Analyst)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: executive-summary
+    attributes:
+      label: Executive Summary
+      placeholder: "Partner banks require the ability to offer..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: objectives
+    attributes:
+      label: Business Objectives
+      placeholder: |
+        | # | Objective | Measure of success |
+        |---|-----------|-------------------|
+        | O1 | ... | ... |
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Business Requirements
+      placeholder: |
+        | ID | Requirement | Priority |
+        |----|-------------|----------|
+        | BR-1 | ... | Must |
+    validations:
+      required: true
+
+  - type: textarea
+    id: stakeholders
+    attributes:
+      label: Stakeholders
+      placeholder: |
+        | Role | Interest |
+        |------|----------|
+        | ... | ... |
+    validations:
+      required: true

@@ -1,0 +1,61 @@
+name: New Epic
+description: Create a new epic document
+title: "[EPIC] "
+labels: ["documentation", "epic"]
+body:
+  - type: input
+    id: epic-id
+    attributes:
+      label: Epic ID
+      description: "EPIC-###"
+      placeholder: "EPIC-003"
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      placeholder: "Push Notifications"
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      placeholder: "A. Rivera (Product Owner)"
+    validations:
+      required: true
+
+  - type: input
+    id: target-release
+    attributes:
+      label: Target Release
+      placeholder: "v2.5.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: "Enable Helios customers to receive real-time push notifications..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: Business Value
+      placeholder: "Reduce support tickets by 25%..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: "In scope / Out of scope"
+    validations:
+      required: true

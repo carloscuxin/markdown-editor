@@ -1,0 +1,88 @@
+name: New User Story
+description: Create a new user story document
+title: "[STORY] "
+labels: ["documentation", "story"]
+body:
+  - type: input
+    id: story-id
+    attributes:
+      label: Story ID
+      description: "HEL-###"
+      placeholder: "HEL-200"
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: Short descriptive title
+      placeholder: "Send notification via email"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: epic
+    attributes:
+      label: Parent Epic
+      options:
+        - EPIC-001 · Instant Payments
+        - EPIC-002 · Fraud & Risk Screening
+        - EPIC-003 · Notifications
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint
+      placeholder: "42"
+    validations:
+      required: true
+
+  - type: input
+    id: points
+    attributes:
+      label: Story Points
+      placeholder: "5"
+    validations:
+      required: true
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      placeholder: "J. Okoro"
+    validations:
+      required: true
+
+  - type: textarea
+    id: story
+    attributes:
+      label: User Story
+      description: "As a [role], I want [capability], so that [benefit]"
+      placeholder: "As a partner-bank integrator, I want to submit a payment through a single API call, so that my customers' funds move to the beneficiary in under 10 seconds."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria (Gherkin)
+      description: "Given/When/Then format"
+      placeholder: |
+        Scenario: Successful payment
+          Given a funded source account
+          When the client POSTs a payment
+          Then the API responds 201
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes & Decisions
+      description: Additional context
+    validations:
+      required: false
