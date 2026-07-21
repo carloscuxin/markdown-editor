@@ -1,0 +1,207 @@
+name: Create Documentation from Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-doc:
+    if: |
+      contains(github.event.issue.labels.*.name, 'story') ||
+      contains(github.event.issue.labels.*.name, 'epic') ||
+      contains(github.event.issue.labels.*.name, 'brd')
+    
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Generate documentation file from issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+            const body = issue.body || '';
+            
+            // Helper: parse "### Label\n...value..." blocks (GitHub Issue Form format)
+            function parseField(label) {
+              const regex = new RegExp(`### ${label}\\s*\\n([\\s\\S]*?)(?=\\n### |$)`, 'i');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+            
+            // Determine document type from labels
+            let docType;
+            if (labels.includes('story')) docType = 'story';
+            else if (labels.includes('epic')) docType = 'epic';
+            else if (labels.includes('brd')) docType = 'brd';
+            else return; // not a documentation issue
+            
+            const child_process = require('child_process');
+            
+            // Parse common fields
+            const id = parseField(docType === 'story' ? 'Story ID' :
+                                   docType === 'epic' ? 'Epic ID' : 'BRD ID');
+            const title = parseField('Title');
+            
+            if (!id || !title) {
+              await github.rest.issues.createComment({
+                owner, repo,
+                issue_number: issue.number,
+                body: '⚠ Missing required fields (ID or Title). Please edit the issue and fill them in.'
+              });
+              return;
+            }
+            
+            // Build filename: lowercase, hyphenated, max 50 chars slug from title
+            const slug = title.toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .slice(0, 50)
+              .replace(/-$/, '');
+            const filename = `${id.toLowerCase()}-${slug}.md`;
+            
+            // Determine target directory & template
+            const targets = {
+              story: { dir: 'docs/agile/stories', template: 'docs/doc-templates/user-story-template.md' },
+              epic:  { dir: 'docs/agile/epics',   template: 'docs/doc-templates/epic-template.md' },
+              brd:   { dir: 'docs/agile/brds',    template: 'docs/doc-templates/brd-template.md' },
+            };
+            const target = targets[docType];
+            
+            // Read template, fill placeholders
+            const fs = require('fs');
+            let template = fs.readFileSync(target.template, 'utf8');
+            
+            // Replace H1 / title placeholder
+            template = template.replace(/<Story title>|<Epic title>|<BRD title>|<Decision title>/g, title);
+            // Replace ID placeholder in H1 if present
+            template = template.replace(/^# .*/m, `# ${id} · ${title}`);
+            
+            // Type-specific field fills
+            if (docType === 'story') {
+              const epic = parseField('Parent Epic');
+              const sprint = parseField('Sprint');
+              const points = parseField('Story Points');
+              const assignee = parseField('Assignee');
+              const story = parseField('User Story');
+              const acceptance = parseField('Acceptance Criteria (Gherkin)');
+              const notes = parseField('Notes & Decisions');
+              
+              template = template.replace('<link to epic>', epic ? `[${epic}](../epics/${epic.toLowerCase()}.md)` : '<link to epic>');
+              template = template.replace(/<sprint #>/g, sprint || '<sprint #>');
+              template = template.replace(/<points>/g, points || '<points>');
+              template = template.replace(/<name>/g, assignee || '<name>');
+              if (story) {
+                template = template.replace(/> \*\*As a\*\* <role>, \*\*I want\*\* <capability>, \*\*so that\*\* <benefit>\./g,
+                                            '> ' + story);
+              }
+              if (acceptance) {
+                template = template.replace(/Scenario: <name>[\s\S]*?Then <expected result>/g, acceptance);
+              }
+              if (notes) {
+                template = template.replace(/<Anything the team should know: constraints, decisions, links\.>/g, notes);
+              }
+            } else if (docType === 'epic') {
+              const owner_field = parseField('Owner');
+              const release = parseField('Target Release');
+              const summary = parseField('Summary');
+              const value = parseField('Business Value');
+              const scope = parseField('Scope');
+              
+              template = template.replace(/<PO name>/g, owner_field || '<PO name>');
+              template = template.replace(/<vX\.Y\.Z>/g, release || '<vX.Y.Z>');
+              if (summary) template = template.replace(/<one or two sentence summary of the epic>/g, summary);
+              if (value) template = template.replace(/<expected business value[^>]*>/g, value);
+            } else if (docType === 'brd') {
+              const author = parseField('Author');
+              const summary = parseField('Executive Summary');
+              const objectives = parseField('Business Objectives');
+              const requirements = parseField('Business Requirements');
+              const stakeholders = parseField('Stakeholders');
+              
+              template = template.replace(/<BA name>/g, author || '<BA name>');
+              if (summary) template = template.replace(/<one or two paragraph summary>/g, summary);
+            }
+            
+            // Write file to disk
+            const targetPath = `${target.dir}/${filename}`;
+            child_process.execSync(`mkdir -p ${target.dir}`);
+            fs.writeFileSync(targetPath, template);
+            
+            // Export env for next step
+            core.exportVariable('DOC_FILE_PATH', targetPath);
+            core.exportVariable('DOC_BRANCH', `docs/${id.toLowerCase()}-${slug}`);
+            core.exportVariable('DOC_TITLE', `${id} · ${title}`);
+            core.exportVariable('DOC_FILENAME', filename);
+      
+      - name: Create branch, commit, and PR
+        uses: actions/github-script@v7
+        env:
+          DOC_FILE_PATH: ${{ env.DOC_FILE_PATH }}
+          DOC_BRANCH: ${{ env.DOC_BRANCH }}
+          DOC_TITLE: ${{ env.DOC_TITLE }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const fs = require('fs');
+            const path = require('path');
+            
+            const filePath = process.env.DOC_FILE_PATH;
+            const branch = process.env.DOC_BRANCH;
+            const title = process.env.DOC_TITLE;
+            const issueNumber = context.payload.issue.number;
+            
+            // Get the default branch's SHA
+            const ref = await github.rest.git.getRef({ owner, repo, ref: 'heads/main' });
+            const baseSha = ref.data.object.sha;
+            
+            // Create the new branch from main
+            await github.rest.git.createRef({
+              owner, repo,
+              ref: `refs/heads/${branch}`,
+              sha: baseSha
+            });
+            
+            // Read file content and base64-encode
+            const content = fs.readFileSync(filePath);
+            const b64 = content.toString('base64');
+            
+            // Create commit with the file
+            await github.rest.repos.createOrUpdateFileContents({
+              owner, repo,
+              path: filePath,
+              message: `docs: add ${title} (from issue #${issueNumber})`,
+              content: b64,
+              branch
+            });
+            
+            // Open the PR (auto-closes the issue)
+            await github.rest.pulls.create({
+              owner, repo,
+              title: `docs: add ${title}`,
+              head: branch,
+              base: 'main',
+              body: [
+                `Closes #${issueNumber}`,
+                '',
+                'This PR was auto-generated from an Issue Form submission.',
+                '',
+                `Created: \`${filePath}\``,
+                '',
+                'Please review the content and adjust the nav in `mkdocs.yml` as needed.'
+              ].join('\n')
+            });
