@@ -52,6 +52,36 @@ body {
 }
 .dashboard-main { flex: 1; padding: 24px; max-width: 960px; }
 
+.dashboard-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+.dtab {
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.dtab:first-child { border-radius: var(--radius) 0 0 0; }
+.dtab:last-child { border-radius: 0 var(--radius) 0 0; }
+.dtab:hover { color: var(--text); }
+.dtab.active { background: var(--surface); color: var(--text); border-bottom-color: var(--surface); }
+
+#wiki-panel { margin-top: -6px; }
+#wiki-panel-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+
 .tree-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .tree-header h3 { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px; }
 

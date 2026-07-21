@@ -25,6 +25,11 @@
     </aside>
 
     <main class="dashboard-main">
+      <div class="dashboard-tabs">
+        <button class="dtab active" data-tab="admin">Administraci&oacute;n</button>
+        <button class="dtab" data-tab="wiki">Documentaci&oacute;n</button>
+      </div>
+
       <div class="dashboard-header">
         <h2>Páginas</h2>
         <div style="display:flex;gap:6px">
@@ -39,6 +44,10 @@
       </div>
 
       <div id="pages-list"></div>
+
+      <div id="wiki-panel" style="display:none">
+        <div class="wiki-panel-content" id="wiki-panel-content"></div>
+      </div>
     </main>
   </div>
 

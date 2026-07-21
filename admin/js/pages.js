@@ -1,5 +1,68 @@
 const Pages = {
   async loadDashboard() {
+    Pages._initTabs()
+    await Pages._renderWikiPanel()
+    await Pages._renderAdminList()
+  },
+
+  _initTabs() {
+    const tabs = document.querySelectorAll('.dtab')
+    tabs.forEach(t => {
+      t.addEventListener('click', function () {
+        tabs.forEach(x => x.classList.remove('active'))
+        this.classList.add('active')
+        const mode = this.dataset.tab
+        document.getElementById('pages-list').style.display = mode === 'admin' ? '' : 'none'
+        document.getElementById('wiki-panel').style.display = mode === 'wiki' ? '' : 'none'
+        const hdr = document.querySelector('.dashboard-header')
+        if (hdr) hdr.style.display = mode === 'admin' ? '' : 'none'
+      })
+    })
+  },
+
+  async _renderWikiPanel() {
+    const panel = document.getElementById('wiki-panel-content')
+    if (!panel) return
+    try {
+      const meta = await API.getMeta()
+      const pages = meta.pages || []
+
+      function findChildren(parent) {
+        return pages.filter(p => p.parent === parent).sort((a, b) => (a.order || 0) - (b.order || 0))
+      }
+
+      function renderTree(parent, depth) {
+        var kids = findChildren(parent)
+        if (kids.length === 0) return ''
+        var h = '<ul style="list-style:none;padding-left:' + (depth * 18 + 8) + 'px">'
+        kids.forEach(function (p) {
+          var hasKids = findChildren(p.name).length > 0
+          h += '<li style="padding:4px 0">'
+          h += '<a href="../wiki/' + p.name + '" target="_blank" style="color:var(--primary);text-decoration:none;font-size:14px">' +
+            (p.title || p.name.replace('.html', '')) + '</a>'
+          if (hasKids) h += ' <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">(' + findChildren(p.name).length + ')</span>'
+          h += renderTree(p.name, depth + 1)
+          h += '</li>'
+        })
+        h += '</ul>'
+        return h
+      }
+
+      var roots = pages.filter(function (p) { return !p.parent })
+      if (roots.length === 0 && pages.length > 0) roots = pages
+
+      panel.innerHTML = '<div style="margin-bottom:16px">' +
+        '<span style="color:var(--text-secondary);font-size:13px">' + pages.length + ' p&aacute;ginas</span>' +
+        ' &middot; <a href="../wiki/index.html" target="_blank" style="color:var(--primary);font-size:13px">Ver index &rarr;</a>' +
+        '</div>' +
+        (roots.length ? renderTree(null, 0) :
+          '<p style="color:var(--text-secondary)">No hay p&aacute;ginas. <a href="editor.html">Crear la primera</a>.</p>')
+    } catch (e) {
+      panel.innerHTML = '<p class="error">No se pudo cargar el &aacute;rbol</p>'
+    }
+  },
+
+  async _renderAdminList() {
     const list = document.getElementById('pages-list')
     const empty = document.getElementById('empty-state')
     if (!list) return
