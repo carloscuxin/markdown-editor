@@ -17,6 +17,12 @@
       "title": "Documento test",
       "parent": null,
       "order": 2
+    },
+    {
+      "name": "test.html",
+      "title": "test",
+      "parent": null,
+      "order": 3
     }
   ]
 }
