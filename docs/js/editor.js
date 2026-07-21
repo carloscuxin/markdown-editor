@@ -38,8 +38,7 @@ const Editor = {
       initialValue: content,
       initialEditType: 'markdown',
       previewStyle: 'vertical',
-      height: 'auto',
-      minHeight: '60vh',
+      height: '100%',
       usageStatistics: false,
     })
 

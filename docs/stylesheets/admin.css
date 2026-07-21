@@ -67,7 +67,9 @@
 .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
 
 /* Editor page */
-.editor-page { margin: 0; padding: 0; }
+.editor-page { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+#editor-container { flex: 1; min-height: 0; }
 
 .editor-header {
   display: flex;
