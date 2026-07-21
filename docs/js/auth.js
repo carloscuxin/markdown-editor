@@ -49,3 +49,5 @@ const Auth = {
     window.location.href = 'login.html'
   }
 }
+
+window.Auth = Auth
