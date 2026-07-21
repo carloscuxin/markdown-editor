@@ -60,31 +60,29 @@ const Editor = {
   _parseNav(yamlContent) {
     const structure = {}
     const lines = yamlContent.split('\n')
-    let currentDomain = null
-    let currentSection = null
     let inNav = false
+    let currentDomain = null
 
     for (const line of lines) {
-      if (line.trim().startsWith('nav:')) {
+      if (line.trim() === 'nav:') {
         inNav = true
         continue
       }
-      if (inNav) {
-        if (line.match(/^- - /) || line.match(/^  - [A-Z]/)) {
-          const match = line.match(/^- ([A-Z]\w+):/)
-          if (match) {
-            currentDomain = match[1]
-            structure[currentDomain] = structure[currentDomain] || {}
-          }
+      if (!inNav) continue
+
+      if (line.match(/^  - \w[\w -]*:/)) {
+        const match = line.match(/^  - ([\w-]+):/)
+        if (match) {
+          currentDomain = match[1]
+          structure[currentDomain] = {}
         }
-        if (currentDomain && line.match(/^    - \w/)) {
-          const match = line.match(/^- (\w[\w-]*):/)
-          if (match) {
-            currentSection = match[1]
-            structure[currentDomain] = structure[currentDomain] || {}
-            structure[currentDomain][currentSection] = true
-          }
+      } else if (currentDomain && line.match(/^    - [\w][\w -]*:/)) {
+        const match = line.match(/^    - ([\w][\w -]*):/)
+        if (match) {
+          structure[currentDomain][match[1]] = true
         }
+      } else if (line.match(/^- /) && !line.startsWith('  ')) {
+        break
       }
     }
     return structure
