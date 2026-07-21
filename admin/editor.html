@@ -21,14 +21,18 @@
   </header>
 
   <div class="editor-toolbar-extra">
-    <select id="domain-select">
-      <option value="">Seleccionar dominio...</option>
+    <select id="domain-select" required>
+      <option value="">Dominio*</option>
       <option value="agile">Agile</option>
       <option value="technical">Technical</option>
       <option value="user-guides">User Guides</option>
     </select>
+    <select id="nav-section-select" required>
+      <option value="">Sección nav*</option>
+    </select>
+    <input type="text" id="new-nav-input" placeholder="Nueva sección..." style="display:none" />
     <select id="template-select">
-      <option value="">Usar plantilla...</option>
+      <option value="">Plantilla...</option>
       <option value="epic">Epic</option>
       <option value="user-story">User Story</option>
       <option value="brd">BRD</option>
