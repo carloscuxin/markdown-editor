@@ -129,7 +129,7 @@ const Editor = {
       previewStyle: 'vertical',
       height: '100%',
       usageStatistics: false,
-      plugins: [codeSyntaxHighlight, colorSyntax]
+      plugins: [[codeSyntaxHighlight, { highlighter: Prism }], colorSyntax]
     })
 
     this._lastSaved = content
