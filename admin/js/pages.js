@@ -225,8 +225,7 @@ const Pages = {
       return
     }
 
-    const md = new markdownit({ html: true, breaks: true, linkify: true })
-    let htmlBody = md.render(markdown)
+    let htmlBody = window.editor.getHTML()
 
     const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
     const fullHtml = Pages.wrapInTemplate(htmlBody, { title, markdown })
