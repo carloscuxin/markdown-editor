@@ -38,7 +38,7 @@
 }
 
 /* Grid cards styling */
-.grid cards > ul {
+.grid.cards > ul {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
@@ -46,14 +46,14 @@
   padding: 0;
 }
 
-.grid cards > ul > li {
+.grid.cards > ul > li {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 0.2rem;
   padding: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.grid cards > ul > li:hover {
+.grid.cards > ul > li:hover {
   border-color: var(--md-accent-fg-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

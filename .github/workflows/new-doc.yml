@@ -67,7 +67,16 @@ jobs:
               .replace(/-+/g, '-')
               .slice(0, 50)
               .replace(/-$/, '');
-            const filename = `${id.toLowerCase()}-${slug}.md`;
+            const safeId = id.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            if (!safeId) {
+              await github.rest.issues.createComment({
+                owner, repo,
+                issue_number: issue.number,
+                body: '⚠ Invalid ID — must contain at least one letter or digit. Please edit the issue and correct it.'
+              });
+              return;
+            }
+            const filename = `${safeId}-${slug}.md`;
             
             // Determine target directory & template
             const targets = {

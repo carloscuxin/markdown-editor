@@ -8,6 +8,9 @@ on:
 jobs:
   check-links:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     
     steps:
       - name: Checkout
@@ -44,5 +47,5 @@ jobs:
                 '',
                 `Build log: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
               ].join('\n'),
-              labels: ['documentation', 'bug']
+              labels: ['documentation']
             });
