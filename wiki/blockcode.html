@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>blockcode</title>
+  <link rel="stylesheet" href="../assets/css/wiki.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <header class="wiki-header">
+    <div class="wiki-header-inner">
+      <h1>Documentaci&oacute;n</h1>
+      <nav>
+        <a href="index.html">Inicio</a>
+        <a href="../admin/dashboard.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+  <button class="wiki-sidebar-toggle">&#9776;</button>
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="wiki-sidebar">
+      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">
+      <nav class="wiki-tree" id="wiki-tree"></nav>
+    </aside>
+    <main class="wiki-content">
+      <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>
+      <h1 class="wiki-page-title">blockcode</h1>
+      <pre><code>```yml
+# =============================================================================
+# Auto-build the MkDocs site and publish it to GitHub Pages on every push to main.
+# No manual steps: edit Markdown -&gt; merge to main -&gt; site updates in ~1 minute.
+# After the first successful run, set Settings &gt; Pages &gt; Source = &quot;GitHub Actions&quot;.
+# =============================================================================
+name: Deploy documentation site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # allows manual &quot;Run workflow&quot; from the Actions tab
+
+# Permissions required for the Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; newer pushes cancel in-progress runs
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: &quot;3.12&quot;
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build site
+        run: mkdocs build --strict   # --strict fails the build on broken links
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+</code></pre>
+<pre><code></code></pre>
+
+      <script type="text/plain" id="wiki-markdown">```
+```yml
+# =============================================================================
+# Auto-build the MkDocs site and publish it to GitHub Pages on every push to main.
+# No manual steps: edit Markdown -> merge to main -> site updates in ~1 minute.
+# After the first successful run, set Settings > Pages > Source = "GitHub Actions".
+# =============================================================================
+name: Deploy documentation site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # allows manual "Run workflow" from the Actions tab
+
+# Permissions required for the Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; newer pushes cancel in-progress runs
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build site
+        run: mkdocs build --strict   # --strict fails the build on broken links
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+```</script>
+      <nav class="wiki-prevnext" id="wiki-prevnext"></nav>
+    </main>
+  </div>
+  <script src="../assets/js/wiki.js"></script>
+</body>
+</html>
