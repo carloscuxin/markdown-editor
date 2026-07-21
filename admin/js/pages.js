@@ -178,8 +178,15 @@ const Pages = {
       return
     }
 
-    const md = new markdownit({ html: true, breaks: true })
-    const htmlBody = md.render(markdown)
+    const md = new markdownit({ html: true })
+    let htmlBody = md.render(markdown)
+
+    // Fix fenced code blocks that markdown-it might not convert
+    htmlBody = htmlBody.replace(/```(\w*)\n([\s\S]*?)```/g, function (match, lang, code) {
+      var langClass = lang ? ' class="language-' + lang + '"' : ''
+      var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return '<pre><code' + langClass + '>' + escaped + '</code></pre>'
+    })
     const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
     const fullHtml = Pages.wrapInTemplate(htmlBody, { title, date: new Date().toLocaleDateString('es-ES') })
 
@@ -527,7 +534,7 @@ const Pages = {
     if (!markdown) return
 
     if (window.editor.getCurrentMode() === 'wysiwyg') {
-      const md = new markdownit({ html: true, breaks: true })
+      const md = new markdownit({ html: true })
       this._insertContent(md.render(markdown))
     } else {
       this._insertContent('\n' + markdown + '\n')
