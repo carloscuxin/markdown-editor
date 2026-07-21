@@ -1,41 +1,65 @@
-# Administrador de Wiki Scrum
+# Markdown Wiki Editor
 
-Un editor visual ligero para gestionar documentación de proyectos Scrum usando [Decap CMS](https://decapcms.org/).
+Editor visual para gestionar documentación técnica directamente en un repositorio GitHub.
 
-## Qué es esto
+## Cómo funciona
 
-Este proyecto proporciona una interfaz web para crear y editar páginas de wiki en formato Markdown, almacenadas directamente en un repositorio de GitHub.
+El panel admin (`admin/`) se conecta a la API de GitHub con un token personal. Cada página se guarda como `.html` renderizado en `wiki/` y su correspondiente `.md` raw para visualización en GitHub. El contenido se edita con [Toast UI Editor](https://ui.toast.com/tui-editor) (WYSIWYG + Markdown).
 
 ## Estructura
 
 ```
 admin/
-├── config.yaml   # Configuración de Decap CMS
-└── index.html    # Punto de entrada del editor
+├── index.html        → Redirige a dashboard o login
+├── dashboard.html    → Panel con árbol de páginas y administración
+├── editor.html       → Editor de contenido
+├── login.html        → Autenticación con token de GitHub
+├── js/
+│   ├── auth.js       → Manejo de token (localStorage + validación con API)
+│   ├── api.js        → Cliente para GitHub Contents API
+│   └── pages.js      → Lógica del editor, renderizado y persistencia
+├── css/
+│   └── style.css
+```
+
+```
+wiki/                 → Páginas publicadas (.html + .md)
+assets/
+├── css/wiki.css      → Estilos de la wiki pública
+├── js/wiki.js        → Sidebar, árbol, búsqueda, TOC, Mermaid
+└── uploads/          → Imágenes y archivos subidos
 ```
 
 ## Uso
 
-1. Clona el repositorio.
-2. Abre `admin/index.html` en tu navegador.
-3. Autentícate con GitHub.
-4. Crea o edita páginas de la wiki.
+1. Clona el repo y activa GitHub Pages desde `main`.
+2. Abre `https://<tu-user>.github.io/markdown-editor/`.
+3. Si hay token guardado → redirige a la wiki. Si no → al login.
+4. Genera un [token clásico](https://github.com/settings/tokens) con permiso `repo`.
+5. En el panel admin puedes crear, editar, reordenar y eliminar páginas.
 
-## Configuración
+## Funcionalidades
 
-- **Backend:** GitHub (`carloscuxin/markdown-editor`, rama `main`)
-- **Media:** Archivos adjuntos se guardan en `assets/uploads/`
-- **Contenido:** Páginas Markdown se guardan en la carpeta `wiki/`
-
-## Requisitos previos
-
-- Repositorio habilitado para GitHub Pages o alojamiento estático.
-- OAuth App configurada en GitHub para autenticación con Decap CMS.
+- Editor WYSIWYG con Toast UI
+- Tablas, listas, blockquotes, código, imágenes
+- Callouts (info/warning/danger/success)
+- Pestañas (tabs)
+- Diagramas Mermaid
+- Tabla de contenido automática (TOC)
+- Búsqueda en el sidebar
+- Breadcrumb y navegación prev/next
+- Árbol jerárquico drag & drop
+- Preservación de markdown original en el HTML
+- Archivos `.md` para visualización en GitHub
+- Validación de sesión en cada página y en cada llamada API
 
 ## Tecnologías
 
-- [Decap CMS 3.x](https://decapcms.org/)
-- HTML5
-- YAML
+- HTML5 / CSS3 / JavaScript vanilla
+- [Toast UI Editor](https://ui.toast.com/tui-editor)
+- [markdown-it](https://github.com/markdown-it/markdown-it)
+- [Mermaid](https://mermaid.js.org/)
+- GitHub Contents API
 
 ---
+
