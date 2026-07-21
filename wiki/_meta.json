@@ -1,22 +1,16 @@
 {
   "pages": [
     {
-      "name": "wiki.html",
-      "title": "Wiki",
-      "parent": null,
-      "order": 0
-    },
-    {
       "name": "wiki-all.html",
       "title": "wiki all",
       "parent": null,
-      "order": 1
+      "order": 0
     },
     {
       "name": "blockcode.html",
       "title": "blockcode",
       "parent": null,
-      "order": 2
+      "order": 1
     }
   ]
 }
