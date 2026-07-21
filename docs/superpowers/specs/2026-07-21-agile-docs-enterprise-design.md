@@ -35,7 +35,7 @@ docs/
 │   ├── user-story-template.md
 │   ├── brd-template.md
 │   ├── release-note-template.md
-│   ├── adr-template.md
+│   ├── adr-template.md          # Architecture Decision Record
 │   └── meeting-notes-template.md
 ├── stylesheets/
 │   └── extra.css
@@ -47,16 +47,36 @@ docs/
 
 ### 1.2 Nav modular
 
+Opción A (recomendada): Un solo `mkdocs.yml` con el nav completo, organizado por comentarios:
+
 ```yaml
 # mkdocs.yml
 nav:
   - Home: index.md
-  - Agile: !include nav/agile.yml
-  - Technical: !include nav/technical.yml
-  - User Guides: !include nav/user-guides.yml
+  # --- Agile ---
+  - Agile:
+    - Overview: agile/index.md
+    - Epics:
+      - agile/epics/index.md
+      - "EPIC-001": agile/epics/epic-001.md
+    - Stories:
+      - agile/stories/index.md
+      # ... más stories
+  # --- Technical ---
+  - Technical:
+    - Overview: technical/index.md
+    - API: technical/api/index.md
+    - Architecture: technical/architecture/index.md
+    # ... más secciones
+  # --- User Guides ---
+  - User Guides:
+    - Overview: user-guides/index.md
+    # ... más guías
 ```
 
-Cada `nav/*.yml` lo mantiene el equipo dueño del dominio.
+Opción B (avanzada): Usar `mkdocs-macros` con un script `main.py` que inyecte navs parciales desde archivos separados. Más complejo pero permite que cada equipo mantenga su propio `nav.yml`.
+
+**Decisión:** Empezar con Opción A. Migrar a B solo si el nav crece por encima de 200 entradas.
 
 ### 1.3 Plugins nuevos
 
@@ -107,6 +127,8 @@ Campos adicionales en templates:
 - "Notas de stakeholder"
 
 ### 2.4 Búsqueda multilenguaje
+
+Agregar configuración de search al plugin existente (no reemplazar):
 
 ```yaml
 plugins:
