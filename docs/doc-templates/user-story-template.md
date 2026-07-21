@@ -31,3 +31,15 @@ Scenario: <name>
 - [ ] Documentation updated.
 - [ ] Acceptance criteria demonstrated.
 - [ ] Accepted by Product Owner.
+
+## Open Questions
+
+- <list any unresolved questions>
+
+## Impact on Other Teams
+
+- <list teams affected and how>
+
+## Stakeholder Notes
+
+<Notes from stakeholder conversations>

@@ -42,6 +42,20 @@
 !!! warning
     <List dependencies on other teams/epics and key risks.>
 
+## Open Questions
+
+- <list any unresolved questions>
+
+## Cross-Team Impact
+
+| Team | Impact | Action Required |
+|------|--------|-----------------|
+| <team> | <description> | <action> |
+
+## Stakeholder Notes
+
+<Notes from stakeholder conversations>
+
 ## Definition of Done
 
 - [ ] All child stories accepted.

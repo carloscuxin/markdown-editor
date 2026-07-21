@@ -44,6 +44,22 @@
 
 - <availability / performance / security / compliance>
 
+## Legal & Compliance Review
+
+| Reviewer | Status | Date | Notes |
+|----------|--------|------|-------|
+| Legal | Pending | | |
+| Compliance | Pending | | |
+| Risk | Pending | | |
+
+## Open Questions
+
+- <list any unresolved questions>
+
+## Stakeholder Notes
+
+<Notes from stakeholder conversations>
+
 ## 8. Acceptance & sign-off
 
 | Approver | Decision | Date |
