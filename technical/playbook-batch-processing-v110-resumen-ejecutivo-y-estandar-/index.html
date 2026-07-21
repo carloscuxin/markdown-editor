@@ -2171,7 +2171,8 @@ SELECT ID_CLIENTE,NOMBRE
 FROM CLIENTES;</code></p>
 <p>Principio:</p>
 <p><code>text
-Menos datos = menor consumo de recursos</code><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+Menos datos = menor consumo de recursos</code></p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h2 id="5-control-de-integridad">5. Control de Integridad<a class="headerlink" href="#5-control-de-integridad" title="Permanent link">&para;</a></h2>
 <p>Todo proceso debe responder:</p>
@@ -2231,29 +2232,25 @@ Menos datos = menor consumo de recursos</code><a href="https://onuris-my.sharepo
 <pre class="mermaid"><code>flowchart LR
 A[Error]
 --&gt; B[Retry]
---&gt; C[Reintento]
-```[1](https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md)
-
----
-
-## Procesos No Repetibles
-
-### Incluyen
-
-- Facturación
-- Liquidaciones
-- Cierres contables
-- Sincronización crítica
-- Actualizaciones sensibles
-
-### Estrategias
-
-- Rollback completo
-- Rollback por Step
-- Recuperación controlada
-
-```mermaid
-flowchart LR
+--&gt; C[Reintento]</code></pre>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+<hr />
+<h2 id="procesos-no-repetibles">Procesos No Repetibles<a class="headerlink" href="#procesos-no-repetibles" title="Permanent link">&para;</a></h2>
+<h3 id="incluyen">Incluyen<a class="headerlink" href="#incluyen" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Facturación</li>
+<li>Liquidaciones</li>
+<li>Cierres contables</li>
+<li>Sincronización crítica</li>
+<li>Actualizaciones sensibles</li>
+</ul>
+<h3 id="estrategias_1">Estrategias<a class="headerlink" href="#estrategias_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Rollback completo</li>
+<li>Rollback por Step</li>
+<li>Recuperación controlada</li>
+</ul>
+<pre class="mermaid"><code>flowchart LR
 A[Falla]
 --&gt; B[Rollback]
 --&gt; C[Recuperación]</code></pre>
@@ -2375,7 +2372,8 @@ step.writer/
 step.tasklet/</p>
 <p>util/
 util.impl/
-```<a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+```</p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h2 id="propiedades-obligatorias">Propiedades Obligatorias<a class="headerlink" href="#propiedades-obligatorias" title="Permanent link">&para;</a></h2>
 <p><code>properties
@@ -2383,7 +2381,8 @@ batch.env
 batch.grid.size
 batch.block.size
 batch.chunk.size
-batch.skip.limit</code><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+batch.skip.limit</code></p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h1 id="componentes-principales-de-spring-batch">🔧 Componentes Principales de Spring Batch<a class="headerlink" href="#componentes-principales-de-spring-batch" title="Permanent link">&para;</a></h1>
 <table>
@@ -2435,13 +2434,12 @@ batch.skip.limit</code><a href="https://onuris-my.sharepoint.com/personal/120179
 <hr />
 <h1 id="patron-de-procesamiento-recomendado">🏆 Patrón de Procesamiento Recomendado<a class="headerlink" href="#patron-de-procesamiento-recomendado" title="Permanent link">&para;</a></h1>
 <h2 id="chunk-processing-estandar">Chunk Processing (Estándar)<a class="headerlink" href="#chunk-processing-estandar" title="Permanent link">&para;</a></h2>
-<p>```mermaid
-flowchart LR</p>
-<p>A[Reader]
+<pre class="mermaid"><code>flowchart LR
+
+A[Reader]
 --&gt; B[Chunk]
 --&gt; C[Processor]
---&gt; D[Writer]
-```</p>
+--&gt; D[Writer]</code></pre>
 <h3 id="beneficios">Beneficios<a class="headerlink" href="#beneficios" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Menor uso de conexiones</li>
@@ -2463,21 +2461,23 @@ Página 2 = 2,000
 Página 3 = 2,000
 Página 4 = 2,000
 Página 5 = 2,000
-```<a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+```</p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h2 id="partitioning">Partitioning<a class="headerlink" href="#partitioning" title="Permanent link">&para;</a></h2>
 <h3 id="problema_1">Problema<a class="headerlink" href="#problema_1" title="Permanent link">&para;</a></h3>
 <p>Procesamiento lento.</p>
 <h3 id="solucion_1">Solución<a class="headerlink" href="#solucion_1" title="Permanent link">&para;</a></h3>
 <p>Ejecutar particiones en paralelo.</p>
-<p>```mermaid
-flowchart TD</p>
-<p>MASTER[Master Step]</p>
-<p>MASTER --&gt; P1[Partition 1]
+<pre class="mermaid"><code>flowchart TD
+
+MASTER[Master Step]
+
+MASTER --&gt; P1[Partition 1]
 MASTER --&gt; P2[Partition 2]
 MASTER --&gt; P3[Partition 3]
-MASTER --&gt; P4[Partition 4]
-```<a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+MASTER --&gt; P4[Partition 4]</code></pre>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h2 id="skip-retry">Skip &amp; Retry<a class="headerlink" href="#skip-retry" title="Permanent link">&para;</a></h2>
 <h3 id="problema_2">Problema<a class="headerlink" href="#problema_2" title="Permanent link">&para;</a></h3>
@@ -2489,14 +2489,17 @@ MASTER --&gt; P4[Partition 4]
 <li>Skip</li>
 <li>Error Fatal</li>
 </ul>
-<p>```mermaid
-flowchart LR</p>
-<p>A[Excepción]</p>
-<p>A --&gt; B{Recuperable?}</p>
-<p>B --&gt;|Si| C[Retry]</p>
-<p>B --&gt;|No| D[Skip]</p>
-<p>D --&gt; E[Continuar]
-```</p>
+<pre class="mermaid"><code>flowchart LR
+
+A[Excepción]
+
+A --&gt; B{Recuperable?}
+
+B --&gt;|Si| C[Retry]
+
+B --&gt;|No| D[Skip]
+
+D --&gt; E[Continuar]</code></pre>
 <p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h1 id="configuracion-recomendada-de-recursos">📊 Configuración Recomendada de Recursos<a class="headerlink" href="#configuracion-recomendada-de-recursos" title="Permanent link">&para;</a></h1>
@@ -2558,7 +2561,8 @@ flowchart LR</p>
 <hr />
 <h2 id="hilos">Hilos<a class="headerlink" href="#hilos" title="Permanent link">&para;</a></h2>
 <p><code>text
-No exceder los núcleos disponibles del CPU.</code><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+No exceder los núcleos disponibles del CPU.</code></p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h1 id="reglas-para-itemprocessor">⚠ Reglas para ItemProcessor<a class="headerlink" href="#reglas-para-itemprocessor" title="Permanent link">&para;</a></h1>
 <h2 id="no-hacer">NO HACER<a class="headerlink" href="#no-hacer" title="Permanent link">&para;</a></h2>
@@ -2644,7 +2648,8 @@ No exceder los núcleos disponibles del CPU.</code><a href="https://onuris-my.sh
 Retry
 Skip
 Rollback
-Restart</code><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
+Restart</code></p>
+<p><a href="https://onuris-my.sharepoint.com/personal/1201791_onuriscp_com/Documents/Archivos%20de%20Microsoft%C2%A0Copilot%20Chat/Playbook_BatchProcessing_v1-1-0.md">1</a></p>
 <hr />
 <h2 id="metadata-obligatoria">Metadata Obligatoria<a class="headerlink" href="#metadata-obligatoria" title="Permanent link">&para;</a></h2>
 <p>Spring Batch debe persistir:</p>
@@ -2824,7 +2829,7 @@ Partitioning</code></p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">21 de julio de 2026 23:07:09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">21 de julio de 2026 23:18:27</span>
   </span>
 
     
