@@ -5,6 +5,12 @@
       "title": "Wiki",
       "parent": null,
       "order": 0
+    },
+    {
+      "name": "wiki-2.html",
+      "title": "wiki 2",
+      "parent": null,
+      "order": 1
     }
   ]
 }
