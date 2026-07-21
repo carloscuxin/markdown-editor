@@ -11,6 +11,12 @@
       "title": "wiki 2",
       "parent": null,
       "order": 1
+    },
+    {
+      "name": "wiki-all.html",
+      "title": "wiki all",
+      "parent": null,
+      "order": 2
     }
   ]
 }
