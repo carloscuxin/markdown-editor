@@ -11,7 +11,8 @@ const API = {
   },
 
   _repoURL(path = '') {
-    return `https://api.github.com/repos/${this.OWNER}/${this.REPO}/contents${path}`
+    const encoded = path.split('/').map(encodeURIComponent).join('/')
+    return `https://api.github.com/repos/${this.OWNER}/${this.REPO}/contents${encoded}`
   },
 
   async _request(url, options = {}) {
@@ -38,9 +39,10 @@ const API = {
   },
 
   async getDoc(path) {
-    const data = await this._request(this._repoURL(`/docs/${path}`))
+    const safePath = path.replace(/^\/+/, '').replace(/\.\./g, '')
+    const data = await this._request(this._repoURL(`/docs/${safePath}`))
     const content = atob(data.content.replace(/\n/g, ''))
-    return { content, sha: data.sha, path }
+    return { content, sha: data.sha, path: safePath }
   },
 
   async saveDoc(path, content, sha = null) {
