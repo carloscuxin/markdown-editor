@@ -185,6 +185,13 @@ const Pages = {
 
     try {
       const { content } = await API.getPage(filename)
+      var parser = new DOMParser()
+      var doc = parser.parseFromString(content, 'text/html')
+      var mdScript = doc.getElementById('wiki-markdown')
+      if (mdScript) {
+        this.initEditor(mdScript.textContent.replace(/\\<\//g, '</'))
+        return
+      }
       const bodyHtml = Pages._extractBodyContent(content)
       const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
       turndownService.keep((node) => node.classList &&
@@ -299,7 +306,7 @@ const Pages = {
       return '<pre><code' + langClass + '>' + escaped + '</code></pre>'
     })
     const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
-    const fullHtml = Pages.wrapInTemplate(htmlBody, { title, date: new Date().toLocaleDateString('es-ES') })
+    const fullHtml = Pages.wrapInTemplate(htmlBody, { title, markdown })
 
     try {
       if (isNew) {
@@ -380,8 +387,12 @@ const Pages = {
     return main.innerHTML.trim()
   },
 
-  wrapInTemplate(content, { title }) {
-    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + title + '</title>\n  <link rel="stylesheet" href="../assets/css/wiki.css">\n  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>\n</head>\n<body>\n  <header class="wiki-header">\n    <div class="wiki-header-inner">\n      <h1>Documentaci&oacute;n</h1>\n      <nav>\n        <a href="index.html">Inicio</a>\n        <a href="../admin/dashboard.html">Admin</a>\n      </nav>\n    </div>\n  </header>\n  <button class="wiki-sidebar-toggle">&#9776;</button>\n  <div class="wiki-layout">\n    <aside class="wiki-sidebar" id="wiki-sidebar">\n      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">\n      <nav class="wiki-tree" id="wiki-tree"></nav>\n    </aside>\n    <main class="wiki-content">\n      <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>\n      <h1 class="wiki-page-title">' + title + '</h1>\n      ' + content + '\n      <nav class="wiki-prevnext" id="wiki-prevnext"></nav>\n    </main>\n  </div>\n  <script src="../assets/js/wiki.js"><\/script>\n</body>\n</html>'
+  wrapInTemplate(content, { title, markdown }) {
+    var mdHtml = ''
+    if (markdown != null) {
+      mdHtml = '\n      <script type="text/plain" id="wiki-markdown">' + markdown.replace(/<\//g, '<\\/') + '<\/script>'
+    }
+    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + title + '</title>\n  <link rel="stylesheet" href="../assets/css/wiki.css">\n  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>\n</head>\n<body>\n  <header class="wiki-header">\n    <div class="wiki-header-inner">\n      <h1>Documentaci&oacute;n</h1>\n      <nav>\n        <a href="index.html">Inicio</a>\n        <a href="../admin/dashboard.html">Admin</a>\n      </nav>\n    </div>\n  </header>\n  <button class="wiki-sidebar-toggle">&#9776;</button>\n  <div class="wiki-layout">\n    <aside class="wiki-sidebar" id="wiki-sidebar">\n      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">\n      <nav class="wiki-tree" id="wiki-tree"></nav>\n    </aside>\n    <main class="wiki-content">\n      <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>\n      <h1 class="wiki-page-title">' + title + '</h1>\n      ' + content + mdHtml + '\n      <nav class="wiki-prevnext" id="wiki-prevnext"></nav>\n    </main>\n  </div>\n  <script src="../assets/js/wiki.js"><\/script>\n</body>\n</html>'
   },
 
   async loadTree() {
