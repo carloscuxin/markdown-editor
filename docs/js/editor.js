@@ -32,7 +32,7 @@ const Editor = {
   },
 
   _initEditor(content) {
-    this._instance = new EasyMDE({
+    this._instance = new SimpleMDE({
       element: document.getElementById('editor-container'),
       value: content,
       autosave: { enabled: false },
