@@ -11,7 +11,7 @@ const Pages = {
     list.innerHTML = '<div class="loading">Cargando páginas...</div>'
 
     try {
-      const files = await API.listPages()
+      const files = (await API.listPages()).filter(f => f.name !== 'index.html')
       if (files.length === 0) {
         list.innerHTML = ''
         if (empty) empty.style.display = 'block'
