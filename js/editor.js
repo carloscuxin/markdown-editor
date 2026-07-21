@@ -136,6 +136,10 @@ const Editor = {
     try {
       const { content, sha } = await API.getDoc(path)
       this._currentSha = sha
+      const titleInput = document.getElementById('doc-title')
+      const filename = path.split('/').pop().replace('.md', '')
+      titleInput.value = filename.replace(/-/g, ' ')
+      titleInput.disabled = true
       this._initEditor(content)
     } catch (err) {
       this._initEditor('')
@@ -148,6 +152,7 @@ const Editor = {
     const domainSelect = document.getElementById('domain-select')
     const navSelect = document.getElementById('nav-section-select')
     const newNavInput = document.getElementById('new-nav-input')
+    const titleInput = document.getElementById('doc-title')
     const content = this._instance.getMarkdown()
 
     if (!content.trim()) {
@@ -156,6 +161,7 @@ const Editor = {
     }
 
     let path = this._currentPath
+    let docTitle = ''
     if (!path) {
       const domain = domainSelect.value
       if (!domain) {
@@ -180,13 +186,22 @@ const Editor = {
         return
       }
 
-      const filename = this._slugify(content.split('\n')[0] || 'documento') + '.md'
-      path = `${domain}/${navSection}/${filename}`
+      docTitle = titleInput.value.trim()
+      if (!docTitle) {
+        this._toast('Ingresá el título del documento', 'error')
+        titleInput.focus()
+        return
+      }
+
+      const slug = this._slugify(docTitle) || 'documento'
+      path = `${domain}/${navSection}/${slug}.md`
 
       if (!this._navStructure[domain]) {
         this._navStructure[domain] = {}
       }
       this._navStructure[domain][navSection] = true
+    } else {
+      docTitle = titleInput.value.trim() || path.split('/').pop().replace('.md', '')
     }
 
     if (status) status.textContent = 'Guardando...'
@@ -199,7 +214,7 @@ const Editor = {
       this._clearDraft()
 
       if (!this._currentSha) {
-        await this._updateMkDocsNav(path)
+        await this._updateMkDocsNav(path, docTitle)
       }
 
       this._toast('Guardado correctamente', 'success')
@@ -218,14 +233,13 @@ const Editor = {
     }
   },
 
-  async _updateMkDocsNav(path) {
+  async _updateMkDocsNav(path, docTitle) {
     if (!this._mkdocsContent) return
 
     const parts = path.replace('.md', '').split('/')
     const domain = parts[0]
     const section = parts[1]
-    const filename = parts[2] || parts[1]
-    const title = document.querySelector('#page-title')?.textContent || filename
+    const title = docTitle || parts[2]
 
     let yaml = this._mkdocsContent
     const domainPattern = new RegExp(`^  - ${domain}:`, 'm')
@@ -317,6 +331,7 @@ const Editor = {
     try {
       localStorage.setItem('editor-draft:' + (this._currentPath || '__new__'), JSON.stringify({
         content: this._instance.getMarkdown(),
+        title: document.getElementById('doc-title').value,
         domain: document.getElementById('domain-select').value,
         navSection: document.getElementById('nav-section-select').value,
         savedAt: Date.now()
@@ -329,6 +344,7 @@ const Editor = {
       const key = 'editor-draft:' + (this._currentPath || '__new__')
       const data = JSON.parse(localStorage.getItem(key))
       if (data && data.content && confirm('Tienes un borrador sin guardar. ¿Restaurar?')) {
+        if (data.title) document.getElementById('doc-title').value = data.title
         if (data.domain) document.getElementById('domain-select').value = data.domain
         if (data.navSection) {
           this._updateNavSections(data.domain)
