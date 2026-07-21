@@ -24,7 +24,11 @@ const Pages = {
     const panel = document.getElementById('wiki-panel-content')
     if (!panel) return
     try {
-      const meta = await API.getMeta()
+      var meta = await API.getMeta()
+      if (!meta.pages || meta.pages.length === 0) {
+        await Pages.syncMeta()
+        meta = await API.getMeta()
+      }
       const pages = meta.pages || []
 
       function findChildren(parent) {
