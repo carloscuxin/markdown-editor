@@ -157,3 +157,5 @@ nav:
     - Release Note: doc-templates/release-note-template.md
     - ADR: doc-templates/adr-template.md
     - Meeting Notes: doc-templates/meeting-notes-template.md
+  # --- Editor ---
+  - Editor: admin/editor.html
