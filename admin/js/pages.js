@@ -74,13 +74,14 @@ const Pages = {
 
     try {
       const { content } = await API.getPage(filename)
+      const bodyHtml = Pages._extractBodyContent(content)
       const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
       turndownService.keep((node) => node.classList &&
         (node.classList.contains('callout') || node.classList.contains('tab-group') ||
          node.classList.contains('tab-nav') || node.classList.contains('tab-content') ||
          node.classList.contains('tab-btn') || node.classList.contains('toc') ||
          node.classList.contains('mermaid')))
-      this.initEditor(turndownService.turndown(content))
+      this.initEditor(turndownService.turndown(bodyHtml))
     } catch (err) {
       this.showToast(`Error al cargar: ${err.message}`, 'error')
       this.initEditor('')
@@ -246,6 +247,17 @@ const Pages = {
     if (event && event.target !== event.currentTarget) return
     const modal = document.getElementById('mermaid-modal')
     if (modal) modal.style.display = 'none'
+  },
+
+  _extractBodyContent(html) {
+    const doc = document.createElement('div')
+    doc.innerHTML = html
+    const main = doc.querySelector('.wiki-content')
+    if (!main) return html
+
+    const toRemove = main.querySelectorAll('#wiki-breadcrumb, .wiki-page-title, #wiki-prevnext')
+    toRemove.forEach(el => el.remove())
+    return main.innerHTML.trim()
   },
 
   wrapInTemplate(content, { title }) {
