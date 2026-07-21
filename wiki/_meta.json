@@ -1,3 +1,10 @@
 {
-  "pages": []
+  "pages": [
+    {
+      "name": "wiki-test.html",
+      "title": "Wiki test",
+      "parent": null,
+      "order": 0
+    }
+  ]
 }
