@@ -1,0 +1,101 @@
+/* Corporate Theme Variables */
+:root {
+  /* Primary colors - Navy corporate */
+  --md-primary-fg-color: #1a365d;
+  --md-primary-fg-color--light: #2a4a7f;
+  --md-primary-fg-color--dark: #0f2440;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #f8fafc;
+  
+  /* Accent colors - Red for actions */
+  --md-accent-fg-color: #e53e3e;
+  --md-accent-fg-color--transparent: rgba(229, 62, 62, 0.1);
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: #fef2f2;
+}
+
+/* Dark mode overrides */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #90cdf4;
+  --md-primary-fg-color--light: #63b3ed;
+  --md-primary-bg-color: #1a202c;
+  --md-primary-bg-color--light: #2d3748;
+  --md-accent-fg-color: #fc8181;
+  --md-accent-bg-color: #1a202c;
+}
+
+/* Domain-specific accent colors */
+[data-md-color-scheme="agile"] {
+  --md-accent-fg-color: #38a169;  /* Green for agile */
+}
+
+[data-md-color-scheme="technical"] {
+  --md-accent-fg-color: #3182ce;  /* Blue for technical */
+}
+
+[data-md-color-scheme="user-guides"] {
+  --md-accent-fg-color: #d69e2e;  /* Yellow for user guides */
+}
+
+/* Grid cards styling */
+.grid cards > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.grid cards > ul > li {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  padding: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.grid cards > ul > li:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.2rem;
+  text-transform: uppercase;
+}
+
+.status-badge--draft {
+  background-color: #ecc94b;
+  color: #744210;
+}
+
+.status-badge--review {
+  background-color: #4299e1;
+  color: #1a365d;
+}
+
+.status-badge--published {
+  background-color: #48bb78;
+  color: #1a4731;
+}
+
+/* Improved table styling */
+.md-typeset table:not([class]) {
+  font-size: 0.8rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  font-weight: 600;
+}
+
+/* Better admonition styling */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 0.2rem;
+}
