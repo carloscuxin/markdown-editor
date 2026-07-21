@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wiki test</title>
+  <title>wiki-test</title>
   <link rel="stylesheet" href="../assets/css/wiki.css">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
@@ -25,9 +25,22 @@
     </aside>
     <main class="wiki-content">
       <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>
-      <h1 class="wiki-page-title">Wiki test</h1>
+      <h1 class="wiki-page-title">wiki-test</h1>
       <p>Esta es otra prueba de html</p>
-
+<br>
+```
+```mermaid
+flowchart TD
+    Client[Client / Partner Bank] -->|API| Gateway[Helios API Gateway]
+    Gateway --> Payments[Instant Payments Service]
+    Gateway --> Cards[Card Processing Service]
+    Payments --> Ledger[(Ledger)]
+    Payments --> Fraud[Fraud & Risk Engine]
+    Cards --> Fraud
+    Fraud --> Ledger
+    Ledger --> Notify[Notifications]
+```
+```
       <nav class="wiki-prevnext" id="wiki-prevnext"></nav>
     </main>
   </div>
