@@ -51,8 +51,15 @@ const Editor = {
       this._mkdocsSha = sha
       this._mkdocsContent = content
       this._navStructure = this._parseNav(content)
+      console.log('Nav structure:', this._navStructure)
     } catch (err) {
-      this._navStructure = {}
+      console.error('Error loading nav:', err)
+      this._navStructure = {
+        'Agile': { 'Overview': true, 'Epics': true, 'User Stories': true, 'Business Requirements': true, 'Release Notes': true, 'Reports': true, 'Meeting Notes': true },
+        'Technical': { 'Overview': true, 'API': true, 'Architecture': true, 'ADRs': true, 'Runbooks': true, 'Batch Processing': true },
+        'User Guides': { 'Overview': true, 'Getting Started': true, 'Features': true, 'FAQ': true },
+        'Templates': { 'Overview': true, 'Epic': true, 'User Story': true, 'BRD': true, 'Release Note': true, 'ADR': true, 'Meeting Notes': true },
+      }
       this._mkdocsContent = ''
     }
   },
@@ -70,8 +77,8 @@ const Editor = {
       }
       if (!inNav) continue
 
-      if (line.match(/^  - \w[\w -]*:/)) {
-        const match = line.match(/^  - ([\w-]+):/)
+      if (line.match(/^  - [\w][\w -]*:/)) {
+        const match = line.match(/^  - ([\w][\w -]*):/)
         if (match) {
           currentDomain = match[1]
           structure[currentDomain] = {}
@@ -91,13 +98,16 @@ const Editor = {
   _updateNavSections(domain) {
     const navSelect = document.getElementById('nav-section-select')
     const newNavInput = document.getElementById('new-nav-input')
-    navSelect.innerHTML = '<option value="">Sección nav*</option>'
+    navSelect.innerHTML = '<option value="">Sección*</option>'
     newNavInput.style.display = 'none'
     newNavInput.value = ''
 
     if (!domain) return
 
+    console.log('Updating sections for domain:', domain)
+    console.log('Available domains:', Object.keys(this._navStructure))
     const sections = this._navStructure[domain] || {}
+    console.log('Sections found:', Object.keys(sections))
     for (const section of Object.keys(sections)) {
       const opt = document.createElement('option')
       opt.value = section
