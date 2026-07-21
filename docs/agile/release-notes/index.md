@@ -12,4 +12,4 @@ Release notes record **what shipped, when, and what changed** for each version o
 | [v2.4.0](v2.4.0.md) | 2026-07-17 | Instant Payments (API) GA | Released |
 | [v2.3.0](v2.3.0.md) | 2026-06-19 | Console redesign, webhook retries | Released |
 
-New release notes start from the [release note template](../doc-templates/release-note-template.md).
+New release notes start from the [release note template](../../doc-templates/release-note-template.md).

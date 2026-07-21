@@ -16,4 +16,4 @@ flowchart LR
     Draft --> Refined --> Committed --> InProgress[In progress] --> Done
 ```
 
-New epics start from the [epic template](../doc-templates/epic-template.md).
+New epics start from the [epic template](../../doc-templates/epic-template.md).

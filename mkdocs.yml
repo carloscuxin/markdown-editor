@@ -1,0 +1,149 @@
+# =============================================================================
+# MkDocs configuration — Enterprise documentation space
+# =============================================================================
+
+site_name: Enterprise Documentation
+site_description: Planning, requirements, technical, and delivery documentation.
+site_author: Documentation Team
+
+repo_name: markdown-editor
+repo_url: https://github.com/carloscuxin/markdown-editor
+edit_uri: edit/main/docs/
+
+# Exclude pre-existing non-enterprise content (superpowers plans/specs) —
+# not part of the published site and unrelated to the docs nav.
+exclude_docs: |
+  superpowers/**
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.action.edit
+    - content.code.copy
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+      lang: es
+  - git-revision-date-localized:
+      type: datetime
+      locale: es
+  - tags:
+      tags_file: tags.md
+  - redirects:
+      redirect_maps:
+        'epics/index.md': 'agile/epics/index.md'
+        'stories/index.md': 'agile/stories/index.md'
+        'brds/index.md': 'agile/brds/index.md'
+        'release-notes/index.md': 'agile/release-notes/index.md'
+        'reports/index.md': 'agile/reports/index.md'
+        'meeting-notes/index.md': 'agile/meeting-notes/index.md'
+        'templates/index.md': 'doc-templates/index.md'
+
+nav:
+  - Home: index.md
+  # --- Agile ---
+  - Agile:
+    - Overview: agile/index.md
+    - Epics:
+      - agile/epics/index.md
+      - "EPIC-001 · Instant Payments": agile/epics/epic-001-instant-payments.md
+      - "EPIC-002 · Fraud & Risk Screening": agile/epics/epic-002-fraud-risk-screening.md
+    - User Stories:
+      - agile/stories/index.md
+      - "HEL-142 · Send instant payment": agile/stories/hel-142-send-instant-payment.md
+      - "HEL-158 · Real-time fraud score": agile/stories/hel-158-realtime-fraud-score.md
+    - Business Requirements:
+      - agile/brds/index.md
+      - "BRD · Instant Payments": agile/brds/brd-instant-payments.md
+    - Release Notes:
+      - agile/release-notes/index.md
+      - "v2.4.0": agile/release-notes/v2.4.0.md
+      - "v2.3.0": agile/release-notes/v2.3.0.md
+    - Reports:
+      - agile/reports/index.md
+      - "Sprint 42 Review": agile/reports/sprint-42-review.md
+      - "Sprint 42 Retrospective": agile/reports/sprint-42-retrospective.md
+    - Meeting Notes:
+      - agile/meeting-notes/index.md
+      - "PI Planning — Q3": agile/meeting-notes/pi-planning-q3.md
+  # --- Technical ---
+  - Technical:
+    - Overview: technical/index.md
+    - API:
+      - technical/api/index.md
+    - Architecture:
+      - technical/architecture/index.md
+    - ADRs:
+      - technical/adrs/index.md
+    - Runbooks:
+      - technical/runbooks/index.md
+  # --- User Guides ---
+  - User Guides:
+    - Overview: user-guides/index.md
+    - Getting Started:
+      - user-guides/getting-started/index.md
+    - Features:
+      - user-guides/features/index.md
+    - FAQ:
+      - user-guides/faq/index.md
+  # --- Templates ---
+  - Templates:
+    - Overview: doc-templates/index.md
+    - Epic: doc-templates/epic-template.md
+    - User Story: doc-templates/user-story-template.md
+    - BRD: doc-templates/brd-template.md
+    - Release Note: doc-templates/release-note-template.md
+    - ADR: doc-templates/adr-template.md
+    - Meeting Notes: doc-templates/meeting-notes-template.md

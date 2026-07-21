@@ -15,4 +15,4 @@ Each story carries acceptance criteria in **Given / When / Then** form and a cle
 | [HEL-142](hel-142-send-instant-payment.md) | Send an instant payment via API | EPIC-001 | 5 | In progress |
 | [HEL-158](hel-158-realtime-fraud-score.md) | Return real-time fraud score | EPIC-002 | 8 | In progress |
 
-New stories start from the [user story template](../doc-templates/user-story-template.md).
+New stories start from the [user story template](../../doc-templates/user-story-template.md).
