@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wiki test</title>
+  <link rel="stylesheet" href="../assets/css/wiki.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <header class="wiki-header">
+    <div class="wiki-header-inner">
+      <h1>Documentaci&oacute;n</h1>
+      <nav>
+        <a href="index.html">Inicio</a>
+        <a href="../admin/dashboard.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+  <button class="wiki-sidebar-toggle">&#9776;</button>
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="wiki-sidebar">
+      <input type="text" class="wiki-search" placeholder="Buscar..." id="wiki-search">
+      <nav class="wiki-tree" id="wiki-tree"></nav>
+    </aside>
+    <main class="wiki-content">
+      <nav class="wiki-breadcrumb" id="wiki-breadcrumb"></nav>
+      <h1 class="wiki-page-title">Wiki test</h1>
+      <p>Esta es una prueba de la wiki test</p>
+<br>
+| Titulo 1 | Titulo 2 |
+| -------- | -------- |
+| vlaor | valor 2 |
+      <nav class="wiki-prevnext" id="wiki-prevnext"></nav>
+    </main>
+  </div>
+  <script src="../assets/js/wiki.js"></script>
+</body>
+</html>
