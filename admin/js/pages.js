@@ -225,7 +225,7 @@ const Pages = {
       return
     }
 
-    const md = new markdownit({ html: true, breaks: true, linkify: true })
+    const md = new markdownit({ html: true, breaks: true, linkify: true }).use(markdownitTaskLists, { enabled: true, label: true, labelAfter: true })
     let htmlBody = md.render(markdown)
 
     const title = (isNew ? titleInput?.value : name.replace('.html', '')) || 'Sin título'
@@ -579,7 +579,7 @@ const Pages = {
     if (!markdown) return
 
     if (window.editor.getCurrentMode() === 'wysiwyg') {
-      const md = new markdownit({ html: true })
+      const md = new markdownit({ html: true }).use(markdownitTaskLists, { enabled: true, label: true, labelAfter: true })
       this._insertContent(md.render(markdown))
     } else {
       this._insertContent('\n' + markdown + '\n')
