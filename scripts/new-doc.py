@@ -32,19 +32,22 @@ def slugify(title):
     return s[:50].strip("-")
 
 
-def epic_link(epic_id, root):
-    pat = f"{epic_id.lower().replace(' ', '-')}-*.md"
-    hits = glob.glob(os.path.join(root, "docs", "agile", "epics", pat))
-    return "../epics/" + os.path.basename(hits[0]) if hits else "../epics/"
+def _glob_link(ref_id, root, subdir):
+    pat = f"{ref_id.lower().replace(' ', '-')}-*.md"
+    hits = glob.glob(os.path.join(root, "docs", "agile", subdir, pat))
+    return f"../{subdir}/" + os.path.basename(hits[0]) if hits else f"../{subdir}/"
 
 
 def fill(text, doc_type, doc_id, title, parent_epic, root):
     if doc_type == "Epic":
         text = text.replace("EPIC-00X", doc_id).replace("<Epic title>", title)
+        if parent_epic:
+            link = _glob_link(parent_epic, root, "brds")
+            text = text.replace("<link to BRD>", f"[{parent_epic}]({link})")
     elif doc_type == "User Story":
         text = text.replace("HEL-###", doc_id).replace("<Story title>", title)
         if parent_epic:
-            link = epic_link(parent_epic, root)
+            link = _glob_link(parent_epic, root, "epics")
             text = text.replace("<link to epic>", f"[{parent_epic}]({link})")
     elif doc_type == "BRD":
         text = text.replace("BRD-YYYY-###", doc_id).replace("<Title>", title)
@@ -54,9 +57,10 @@ def fill(text, doc_type, doc_id, title, parent_epic, root):
         text = text.replace("ADR-00X", doc_id).replace("<Decision title>", title)
     elif doc_type == "Meeting Notes":
         date = doc_id.split("-", 1)[1] if doc_id.startswith("MTG-") else doc_id
-        text = (text.replace("MTG-YYYY-MM-DD", doc_id)
-                    .replace("<Meeting name>", title)
-                    .replace("<date>", date))
+        h1 = f"# {title} \u2014 {date}"
+        text = text.replace("# <Meeting name> \u2014 <date>", h1)
+        if "<YYYY-MM-DD>" in text:
+            text = text.replace("<YYYY-MM-DD>", date, 1)
     return text
 
 
@@ -80,6 +84,8 @@ def main():
     parent_epic = ""
     if doc_type == "User Story":
         parent_epic = input("Parent epic (e.g. EPIC-001, blank to skip): ").strip()
+    elif doc_type == "Epic":
+        parent_epic = input("Source BRD (e.g. BRD-2026-014, blank to skip): ").strip()
 
     slug = slugify(title)
     name = doc_id.lower().replace(" ", "-")
