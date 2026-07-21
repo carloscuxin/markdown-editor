@@ -121,6 +121,7 @@ const Editor = {
 
   _initEditor(content) {
     var TuiEditor = toastui.Editor
+    const { codeSyntaxHighlight, colorSyntax } = TuiEditor.plugin
     this._instance = new TuiEditor({
       el: document.getElementById('editor-container'),
       initialValue: content,
@@ -128,6 +129,7 @@ const Editor = {
       previewStyle: 'vertical',
       height: '100%',
       usageStatistics: false,
+      plugins: [codeSyntaxHighlight, colorSyntax]
     })
 
     this._lastSaved = content
