@@ -13,3 +13,9 @@ npm-debug.log*
 # Archivos temporales
 *.tmp
 *.bak
+
+# MkDocs build output
+site/
+
+# Planes locales (sin commit)
+plans/
