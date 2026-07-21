@@ -69,5 +69,23 @@ const API = {
         branch: 'main',
       }),
     })
+  },
+
+  async getMkDocsYaml() {
+    const data = await this._request(this._repoURL('/mkdocs.yml'))
+    const content = atob(data.content.replace(/\n/g, ''))
+    return { content, sha: data.sha }
+  },
+
+  async saveMkDocsYaml(content, sha) {
+    return this._request(this._repoURL('/mkdocs.yml'), {
+      method: 'PUT',
+      body: JSON.stringify({
+        message: `docs: actualiza nav para nuevo documento`,
+        content: btoa(unescape(encodeURIComponent(content))),
+        sha,
+        branch: 'main',
+      }),
+    })
   }
 }

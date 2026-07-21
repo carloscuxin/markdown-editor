@@ -5,30 +5,112 @@ const Editor = {
   _currentSha: null,
   _lastSaved: '',
   _draftTimer: null,
+  _mkdocsSha: null,
 
   async init() {
     const params = new URLSearchParams(window.location.search)
     const filePath = params.get('file')
     const titleEl = document.getElementById('page-title')
     const domainSelect = document.getElementById('domain-select')
+    const navSelect = document.getElementById('nav-section-select')
+    const newNavInput = document.getElementById('new-nav-input')
+
+    await this._loadNavSections()
 
     if (filePath) {
       this._currentPath = filePath
       titleEl.textContent = `Editando: ${filePath}`
       domainSelect.value = filePath.split('/')[0] || ''
       domainSelect.disabled = true
+      navSelect.disabled = true
       await this._loadDoc(filePath)
     } else {
       titleEl.textContent = 'Nuevo documento'
       this._initEditor(this._loadDraft() || '')
     }
 
-    domainSelect.addEventListener('change', () => this._updatePathPreview())
+    domainSelect.addEventListener('change', () => {
+      this._updateNavSections(domainSelect.value)
+      this._updatePathPreview()
+    })
+
+    navSelect.addEventListener('change', () => {
+      newNavInput.style.display = navSelect.value === '__new__' ? 'block' : 'none'
+      if (navSelect.value !== '__new__') newNavInput.value = ''
+    })
 
     document.getElementById('template-select').addEventListener('change', (e) => {
       if (e.target.value) this._applyTemplate(e.target.value)
       e.target.value = ''
     })
+  },
+
+  async _loadNavSections() {
+    try {
+      const { content, sha } = await API.getMkDocsYaml()
+      this._mkdocsSha = sha
+      this._mkdocsContent = content
+      this._navStructure = this._parseNav(content)
+    } catch (err) {
+      this._navStructure = {}
+      this._mkdocsContent = ''
+    }
+  },
+
+  _parseNav(yamlContent) {
+    const structure = {}
+    const lines = yamlContent.split('\n')
+    let currentDomain = null
+    let currentSection = null
+    let inNav = false
+
+    for (const line of lines) {
+      if (line.trim().startsWith('nav:')) {
+        inNav = true
+        continue
+      }
+      if (inNav) {
+        if (line.match(/^- - /) || line.match(/^  - [A-Z]/)) {
+          const match = line.match(/^- ([A-Z]\w+):/)
+          if (match) {
+            currentDomain = match[1]
+            structure[currentDomain] = structure[currentDomain] || {}
+          }
+        }
+        if (currentDomain && line.match(/^    - \w/)) {
+          const match = line.match(/^- (\w[\w-]*):/)
+          if (match) {
+            currentSection = match[1]
+            structure[currentDomain] = structure[currentDomain] || {}
+            structure[currentDomain][currentSection] = true
+          }
+        }
+      }
+    }
+    return structure
+  },
+
+  _updateNavSections(domain) {
+    const navSelect = document.getElementById('nav-section-select')
+    const newNavInput = document.getElementById('new-nav-input')
+    navSelect.innerHTML = '<option value="">Sección nav*</option>'
+    newNavInput.style.display = 'none'
+    newNavInput.value = ''
+
+    if (!domain) return
+
+    const sections = this._navStructure[domain] || {}
+    for (const section of Object.keys(sections)) {
+      const opt = document.createElement('option')
+      opt.value = section
+      opt.textContent = section
+      navSelect.appendChild(opt)
+    }
+
+    const newOpt = document.createElement('option')
+    newOpt.value = '__new__'
+    newOpt.textContent = '+ Nueva sección...'
+    navSelect.appendChild(newOpt)
   },
 
   _initEditor(content) {
@@ -64,6 +146,8 @@ const Editor = {
   async save() {
     const status = document.getElementById('editor-status')
     const domainSelect = document.getElementById('domain-select')
+    const navSelect = document.getElementById('nav-section-select')
+    const newNavInput = document.getElementById('new-nav-input')
     const content = this._instance.getMarkdown()
 
     if (!content.trim()) {
@@ -76,10 +160,33 @@ const Editor = {
       const domain = domainSelect.value
       if (!domain) {
         this._toast('Seleccioná un dominio', 'error')
+        domainSelect.focus()
         return
       }
+
+      let navSection = navSelect.value
+      if (navSection === '__new__') {
+        navSection = newNavInput.value.trim()
+        if (!navSection) {
+          this._toast('Ingresá el nombre de la nueva sección', 'error')
+          newNavInput.focus()
+          return
+        }
+        navSection = this._slugify(navSection)
+      }
+      if (!navSection) {
+        this._toast('Seleccioná una sección del nav', 'error')
+        navSelect.focus()
+        return
+      }
+
       const filename = this._slugify(content.split('\n')[0] || 'documento') + '.md'
-      path = `${domain}/${filename}`
+      path = `${domain}/${navSection}/${filename}`
+
+      if (!this._navStructure[domain]) {
+        this._navStructure[domain] = {}
+      }
+      this._navStructure[domain][navSection] = true
     }
 
     if (status) status.textContent = 'Guardando...'
@@ -90,6 +197,11 @@ const Editor = {
       this._dirty = false
       this._lastSaved = content
       this._clearDraft()
+
+      if (!this._currentSha) {
+        await this._updateMkDocsNav(path)
+      }
+
       this._toast('Guardado correctamente', 'success')
       if (status) {
         status.textContent = '✓ Guardado'
@@ -103,6 +215,59 @@ const Editor = {
     } catch (err) {
       this._toast(`Error al guardar: ${err.message}`, 'error')
       if (status) status.textContent = ''
+    }
+  },
+
+  async _updateMkDocsNav(path) {
+    if (!this._mkdocsContent) return
+
+    const parts = path.replace('.md', '').split('/')
+    const domain = parts[0]
+    const section = parts[1]
+    const filename = parts[2] || parts[1]
+    const title = document.querySelector('#page-title')?.textContent || filename
+
+    let yaml = this._mkdocsContent
+    const domainPattern = new RegExp(`^  - ${domain}:`, 'm')
+    const domainMatch = yaml.match(domainPattern)
+
+    if (!domainMatch) {
+      const sectionHeader = yaml.includes('# --- Editor ---') ? '# --- Editor ---' : 'nav:'
+      const domainBlock = `  - ${domain.charAt(0).toUpperCase() + domain.slice(1)}:\n    - Overview: ${domain}/index.md\n    - ${section.charAt(0).toUpperCase() + section.slice(1)}:\n      - "${title}": ${path}`
+      yaml = yaml.replace(sectionHeader, `${domainBlock}\n${sectionHeader}`)
+    } else {
+      const domainIdx = yaml.indexOf(domainMatch[0])
+      const afterDomain = yaml.substring(domainIdx)
+      const sectionPattern = new RegExp(`^    - ${section}:`, 'm')
+      const sectionMatch = afterDomain.match(sectionPattern)
+
+      if (!sectionMatch) {
+        const navEntry = `    - ${section.charAt(0).toUpperCase() + section.slice(1)}:\n      - "${title}": ${path}`
+        const lines = yaml.split('\n')
+        const domainLineIdx = lines.findIndex(l => l.includes(domainMatch[0]))
+        let insertIdx = domainLineIdx + 1
+        while (insertIdx < lines.length && (lines[insertIdx].startsWith('    - ') || lines[insertIdx].startsWith('      -'))) {
+          insertIdx++
+        }
+        lines.splice(insertIdx, 0, navEntry)
+        yaml = lines.join('\n')
+      } else {
+        const sectionIdx = yaml.indexOf(sectionMatch[0], domainIdx)
+        const afterSection = yaml.substring(sectionIdx)
+        const lastEntryMatch = afterSection.match(/      - "[^"]*": [^\n]+/g)
+        if (lastEntryMatch) {
+          const lastEntry = lastEntryMatch[lastEntryMatch.length - 1]
+          const lastEntryIdx = yaml.indexOf(lastEntry, sectionIdx) + lastEntry.length
+          yaml = yaml.substring(0, lastEntryIdx) + `\n      - "${title}": ${path}` + yaml.substring(lastEntryIdx)
+        }
+      }
+    }
+
+    try {
+      await API.saveMkDocsYaml(yaml, this._mkdocsSha)
+      this._mkdocsContent = yaml
+    } catch (err) {
+      this._toast('Nav no actualizado. Agregá manualmente a mkdocs.yml', 'error')
     }
   },
 
@@ -153,6 +318,7 @@ const Editor = {
       localStorage.setItem('editor-draft:' + (this._currentPath || '__new__'), JSON.stringify({
         content: this._instance.getMarkdown(),
         domain: document.getElementById('domain-select').value,
+        navSection: document.getElementById('nav-section-select').value,
         savedAt: Date.now()
       }))
     } catch (e) {}
@@ -164,6 +330,10 @@ const Editor = {
       const data = JSON.parse(localStorage.getItem(key))
       if (data && data.content && confirm('Tienes un borrador sin guardar. ¿Restaurar?')) {
         if (data.domain) document.getElementById('domain-select').value = data.domain
+        if (data.navSection) {
+          this._updateNavSections(data.domain)
+          document.getElementById('nav-section-select').value = data.navSection
+        }
         return data.content
       }
       if (data) localStorage.removeItem(key)
