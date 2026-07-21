@@ -15,6 +15,11 @@ const API = {
 
   async _request(url, options = {}) {
     const res = await fetch(url, { ...options, headers: this._headers() })
+    if (res.status === 401) {
+      Auth.clearToken()
+      window.location.href = 'login.html'
+      throw new Error('Sesión expirada')
+    }
     const body = await res.json()
     if (!res.ok) throw new Error(body.message || `Error ${res.status}`)
     return body

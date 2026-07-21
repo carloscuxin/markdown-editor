@@ -2,8 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0;url=login.html" />
+  <meta name="robots" content="noindex" />
   <title>Redirigiendo...</title>
+  <script>
+    if (localStorage.getItem('gh_pat_token')) {
+      window.location.replace('dashboard.html')
+    } else {
+      window.location.replace('login.html')
+    }
+  </script>
 </head>
 <body>
   <a href="login.html">Ir al inicio de sesión</a>
