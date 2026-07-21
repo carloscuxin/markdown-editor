@@ -11,6 +11,12 @@
       "title": "blockcode",
       "parent": null,
       "order": 1
+    },
+    {
+      "name": "documento-test.html",
+      "title": "Documento test",
+      "parent": null,
+      "order": 2
     }
   ]
 }
