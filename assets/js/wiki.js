@@ -5,7 +5,7 @@
   var sidebar = document.getElementById('wiki-sidebar')
   var treeEl = document.getElementById('wiki-tree')
   var searchInput = document.getElementById('wiki-search')
-  var meta
+  var meta = { pages: [] }
 
   // Tabs
   document.addEventListener('click', function (e) {
@@ -73,7 +73,7 @@
   function renderBreadcrumb() {
     var pages = meta.pages || []
     var bc = document.getElementById('wiki-breadcrumb')
-    if (!bc) return
+    if (!bc || pages.length === 0) return
 
     function findPage(name) { return pages.find(function (p) { return p.name === name }) }
 
@@ -91,11 +91,11 @@
     }).join(' <span class="bc-sep">&rsaquo;</span> ')
   }
 
-  // Prev/Next navigation
+  // Prev/Next
   function renderPrevNext() {
     var pages = meta.pages || []
     var nav = document.getElementById('wiki-prevnext')
-    if (!nav) return
+    if (!nav || pages.length === 0) return
 
     var current = pages.find(function (p) { return p.name === curPage })
     if (!current) return
@@ -146,15 +146,24 @@
 
   // Mermaid
   function initMermaid() {
-    document.querySelectorAll('pre > code.language-mermaid').forEach(function (code) {
-      var div = document.createElement('div')
-      div.className = 'mermaid'
-      div.textContent = code.textContent
-      code.parentElement.replaceWith(div)
-    })
-    if (typeof mermaid !== 'undefined') {
-      mermaid.initialize({ startOnLoad: true, theme: 'default' })
+    // Convert <pre><code class="language-mermaid"> to <div class="mermaid">
+    var codes = document.querySelectorAll('pre > code.language-mermaid')
+    if (codes.length > 0) {
+      codes.forEach(function (code) {
+        var pre = code.parentElement
+        var div = document.createElement('div')
+        div.className = 'mermaid'
+        div.textContent = code.textContent
+        pre.replaceWith(div)
+      })
     }
+
+    if (typeof mermaid === 'undefined') return
+    try {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' })
+      var els = document.querySelectorAll('.mermaid')
+      if (els.length) mermaid.run({ nodes: els }).catch(function () {})
+    } catch (e) {}
   }
 
   // TOC
@@ -166,7 +175,7 @@
 
       var list = document.createElement('div')
       headings.forEach(function (h) {
-        var id = h.id || h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        var id = h.id || h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
         h.id = id
         var a = document.createElement('a')
         a.href = '#' + id
@@ -190,7 +199,6 @@
     }
 
     overlay.addEventListener('click', close)
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') close()
     })
@@ -204,22 +212,25 @@
     }
   }
 
-  // Load meta and render
+  // Init
+  initMobileSidebar()
+
+  // Hide template title if content has its own h1 with same text
+  var pageTitle = document.querySelector('.wiki-page-title')
+  var contentH1 = document.querySelector('.wiki-content h1:not(.wiki-page-title)')
+  if (contentH1 && pageTitle && contentH1.textContent.trim() === pageTitle.textContent.trim()) {
+    pageTitle.style.display = 'none'
+  }
+
   fetch('_meta.json')
     .then(function (r) { return r.json() })
-    .then(function (data) {
-      meta = data
+    .then(function (data) { meta = data })
+    .catch(function () { meta = { pages: [] } })
+    .finally(function () {
       renderTree()
       renderBreadcrumb()
       renderPrevNext()
-    })
-    .catch(function () {
-      meta = { pages: [] }
-      if (treeEl) treeEl.innerHTML = ''
-    })
-    .finally(function () {
-      initMermaid()
       initTOC()
-      initMobileSidebar()
+      initMermaid()
     })
 })()
