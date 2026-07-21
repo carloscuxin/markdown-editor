@@ -32,25 +32,20 @@ const Editor = {
   },
 
   _initEditor(content) {
-    this._instance = new SimpleMDE({
-      element: document.getElementById('editor-container'),
-      value: content,
-      autosave: { enabled: false },
-      toolbar: [
-        'heading', 'bold', 'italic', 'strikethrough', '|',
-        'quote', 'unordered-list', 'ordered-list', '|',
-        'link', 'image', 'table', 'horizontal-rule', '|',
-        'code', 'side-by-side', 'fullscreen', '|',
-        'preview', 'guide'
-      ],
-      status: false,
+    var TuiEditor = toastui.Editor
+    this._instance = new TuiEditor({
+      el: document.getElementById('editor-container'),
+      initialValue: content,
+      initialEditType: 'markdown',
+      previewStyle: 'vertical',
+      height: 'auto',
       minHeight: '60vh',
-      spellChecker: false,
+      usageStatistics: false,
     })
 
     this._lastSaved = content
-    this._instance.codemirror.on('change', () => {
-      this._dirty = this._instance.value() !== this._lastSaved
+    this._instance.on('change', () => {
+      this._dirty = this._instance.getMarkdown() !== this._lastSaved
       clearTimeout(this._draftTimer)
       this._draftTimer = setTimeout(() => this._persistDraft(), 2000)
     })
@@ -70,7 +65,7 @@ const Editor = {
   async save() {
     const status = document.getElementById('editor-status')
     const domainSelect = document.getElementById('domain-select')
-    const content = this._instance.value()
+    const content = this._instance.getMarkdown()
 
     if (!content.trim()) {
       this._toast('El contenido está vacío', 'error')
@@ -114,7 +109,7 @@ const Editor = {
 
   preview() {
     const md = new markdownit({ html: true, breaks: true, linkify: true })
-    const html = md.render(this._instance.value())
+    const html = md.render(this._instance.getMarkdown())
     document.getElementById('preview-content').innerHTML = html
     document.getElementById('preview-modal').style.display = 'flex'
   },
@@ -140,7 +135,7 @@ const Editor = {
     }
 
     if (templates[type] && this._instance) {
-      this._instance.value(templates[type])
+      this._instance.setMarkdown(templates[type])
       this._dirty = true
     }
   },
@@ -157,7 +152,7 @@ const Editor = {
     if (!this._dirty) return
     try {
       localStorage.setItem('editor-draft:' + (this._currentPath || '__new__'), JSON.stringify({
-        content: this._instance.value(),
+        content: this._instance.getMarkdown(),
         domain: document.getElementById('domain-select').value,
         savedAt: Date.now()
       }))
