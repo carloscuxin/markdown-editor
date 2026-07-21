@@ -51,6 +51,7 @@ const Pages = {
       const { sha } = await API.getPage(filename)
       await API.deletePage(filename, sha)
       this.showToast('Página eliminada', 'success')
+      Pages.regenerateIndex()
       this.loadDashboard()
     } catch (err) {
       this.showToast(`Error: ${err.message}`, 'error')
@@ -198,6 +199,7 @@ const Pages = {
         await API.savePage(name, fullHtml, sha)
       }
       this.showToast('Página guardada correctamente', 'success')
+      Pages.regenerateIndex()
       setTimeout(() => { window.location.href = 'dashboard.html' }, 1200)
     } catch (err) {
       this.showToast(`Error al guardar: ${err.message}`, 'error')
@@ -439,8 +441,62 @@ const Pages = {
       await API.saveMeta(meta)
       Pages.loadTree()
       Pages.showToast('Jerarquia actualizada', 'success')
+      Pages.regenerateIndex()
     } catch (err) {
       Pages.showToast('Error: ' + err.message, 'error')
+    }
+  },
+
+  async regenerateIndex() {
+    try {
+      const meta = await API.getMeta()
+      const pages = meta.pages || []
+
+      function findChildren(parent) {
+        return pages.filter(p => p.parent === parent).sort((a, b) => (a.order || 0) - (b.order || 0))
+      }
+
+      function renderList(parentName, depth) {
+        var children = findChildren(parentName)
+        if (children.length === 0) return ''
+        var html = '<ul class="index-list" style="padding-left:' + (depth * 20 + 16) + 'px">'
+        children.forEach(function (p) {
+          var title = p.title || p.name.replace('.html', '')
+          var hasKids = findChildren(p.name).length > 0
+          html += '<li class="index-item">'
+          html += '<a href="' + p.name + '" class="index-link">' + title + '</a>'
+          if (hasKids) html += '<span class="index-badge">' + findChildren(p.name).length + '</span>'
+          html += renderList(p.name, depth + 1)
+          html += '</li>'
+        })
+        html += '</ul>'
+        return html
+      }
+
+      var content = '<div class="wiki-index">'
+      content += '<p class="wiki-index-desc">' + pages.length + ' p&aacute;ginas en la documentaci&oacute;n</p>'
+
+      var roots = pages.filter(function (p) { return !p.parent })
+      if (roots.length > 0) {
+        content += renderList(null, 0)
+      } else if (pages.length > 0) {
+        content += '<ul class="index-list">'
+        pages.forEach(function (p) {
+          content += '<li class="index-item"><a href="' + p.name + '" class="index-link">' +
+            (p.title || p.name.replace('.html', '')) + '</a></li>'
+        })
+        content += '</ul>'
+      } else {
+        content += '<p class="wiki-index-empty">No hay p&aacute;ginas todav&iacute;a. <a href="../admin/editor.html">Crear la primera</a>.</p>'
+      }
+      content += '</div>'
+
+      const fullHtml = Pages.wrapInTemplate(content, { title: 'Inicio' })
+      let sha = null
+      try { var eix = await API.getPage('index.html'); sha = eix.sha } catch (_) {}
+      await API.savePage('index.html', fullHtml, sha)
+    } catch (err) {
+      // Silently fail - index is non-critical
     }
   },
 

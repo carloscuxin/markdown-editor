@@ -240,6 +240,23 @@ nav.toc a.toc-h4 { padding-left: 32px; }
 
 .wiki-footer a { color: var(--primary); text-decoration: none; }
 
+/* Index page */
+.wiki-index { }
+.wiki-index-desc { color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; }
+.wiki-index-empty { color: var(--text-secondary); font-size: 14px; margin-top: 32px; }
+.index-list { list-style: none; padding-left: 16px; margin: 0; }
+.index-item { padding: 5px 0; position: relative; }
+.index-link { color: var(--primary); text-decoration: none; font-size: 15px; }
+.index-link:hover { text-decoration: underline; }
+.index-badge {
+  font-size: 11px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  border-radius: 10px;
+  padding: 1px 7px;
+  margin-left: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .wiki-sidebar {
