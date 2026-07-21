@@ -417,3 +417,17 @@ body {
   .page-actions .btn { flex: 1; justify-content: center; }
   .app-main { padding: 16px; }
 }
+
+/* Editor status indicator (inside .editor-actions flex) */
+.editor-status {
+  margin-left: auto;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+.editor-status.saving { color: #f5a623; }
+.editor-status.saved { color: #38a169; }
+.editor-status.draft { color: var(--text-secondary); }
+.editor-status.error { color: var(--danger); }

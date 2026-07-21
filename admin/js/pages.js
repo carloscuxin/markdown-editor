@@ -1,4 +1,12 @@
 const Pages = {
+  _lastCommittedMarkdown: '',
+  _dirty: false,
+  _draftTimer: null,
+  _draftKey() {
+    const file = new URLSearchParams(window.location.search).get('file')
+    return 'wiki-draft:' + (file || '__new__')
+  },
+
   async loadDashboard() {
     await Pages._renderAdminList()
   },
@@ -112,7 +120,7 @@ const Pages = {
     }
 
     if (isNew) {
-      this.initEditor('')
+      this.initEditor(Pages._applyDraft(''))
       return
     }
 
@@ -122,7 +130,7 @@ const Pages = {
       var doc = parser.parseFromString(content, 'text/html')
       var mdScript = doc.getElementById('wiki-markdown')
       if (mdScript) {
-        this.initEditor(mdScript.textContent.replace(/\\<\//g, '</'))
+        this.initEditor(Pages._applyDraft(mdScript.textContent.replace(/\\<\//g, '</')))
         return
       }
       const _d = document.createElement('div')
@@ -136,10 +144,10 @@ const Pages = {
          node.classList.contains('tab-nav') || node.classList.contains('tab-content') ||
          node.classList.contains('tab-btn') || node.classList.contains('toc') ||
          node.classList.contains('mermaid')))
-      this.initEditor(turndownService.turndown(bodyHtml))
+      this.initEditor(Pages._applyDraft(turndownService.turndown(bodyHtml)))
     } catch (err) {
       this.showToast(`Error al cargar: ${err.message}`, 'error')
-      this.initEditor('')
+      this.initEditor(Pages._applyDraft(''))
     }
   },
 
@@ -160,6 +168,15 @@ const Pages = {
         'divider', 'code', 'codeblock'
       ],
       usageStatistics: false
+    })
+
+    Pages._lastCommittedMarkdown = initialValue || ''
+
+    window.editor.on('change', () => {
+      const current = window.editor.getMarkdown()
+      Pages._dirty = current !== Pages._lastCommittedMarkdown
+      clearTimeout(Pages._draftTimer)
+      Pages._draftTimer = setTimeout(() => Pages._persistDraft(), 2000)
     })
 
     Pages._createInsertPanel()
@@ -199,6 +216,9 @@ const Pages = {
   },
 
   async savePage() {
+    const status = document.getElementById('editor-status')
+    if (status) { status.textContent = 'Guardando...'; status.className = 'editor-status saving' }
+
     const params = new URLSearchParams(window.location.search)
     const filename = params.get('file')
     const isNew = !filename
@@ -209,6 +229,7 @@ const Pages = {
     if (isNew) {
       const raw = (titleInput?.value || '').trim()
       if (!raw) {
+        if (status) { status.textContent = ''; status.className = 'editor-status' }
         this.showToast('Ingresa un título para la página', 'error')
         return
       }
@@ -221,6 +242,7 @@ const Pages = {
 
     const markdown = window.editor.getMarkdown()
     if (!markdown.trim()) {
+      if (status) { status.textContent = ''; status.className = 'editor-status' }
       this.showToast('El contenido está vacío', 'error')
       return
     }
@@ -240,10 +262,16 @@ const Pages = {
         await API.savePage(name, fullHtml, sha)
       }
 
+      Pages._clearDraft()
+      Pages._lastCommittedMarkdown = window.editor.getMarkdown()
+      Pages._dirty = false
+
       this.showToast('Página guardada correctamente', 'success')
       Pages.regenerateIndex()
+      if (status) { status.textContent = '\u2713 Guardado'; status.className = 'editor-status saved'; clearTimeout(this._statusTimer); this._statusTimer = setTimeout(() => { if (status) { status.textContent = ''; status.className = 'editor-status' } }, 2000) }
       setTimeout(() => { window.location.href = 'dashboard.html' }, 1200)
     } catch (err) {
+      if (status) { status.textContent = '\u2715 Error'; status.className = 'editor-status error' }
       this.showToast(`Error al guardar: ${err.message}`, 'error')
     }
   },
@@ -254,6 +282,45 @@ const Pages = {
     toast.textContent = message
     toast.className = `toast toast-${type} show`
     setTimeout(() => { toast.className = 'toast' }, 3000)
+  },
+
+  _persistDraft() {
+    if (!Pages._dirty) return
+    const titleEl = document.getElementById('title-input')
+    try {
+      localStorage.setItem(Pages._draftKey(), JSON.stringify({
+        markdown: window.editor.getMarkdown(),
+        title: titleEl ? titleEl.value : '',
+        savedAt: Date.now()
+      }))
+    } catch (e) {}
+    const status = document.getElementById('editor-status')
+    if (status) { status.textContent = 'Borrador guardado'; status.className = 'editor-status draft'; clearTimeout(this._statusTimer); this._statusTimer = setTimeout(() => { if (status) status.textContent = '' }, 1500) }
+  },
+
+  _hasDraft() {
+    try { return localStorage.getItem(Pages._draftKey()) != null } catch (e) { return false }
+  },
+
+  _loadDraft() {
+    try { return JSON.parse(localStorage.getItem(Pages._draftKey()) || 'null') } catch { return null }
+  },
+
+  _clearDraft() {
+    try { localStorage.removeItem(Pages._draftKey()) } catch (e) {}
+  },
+
+  _applyDraft(initial) {
+    const draft = Pages._loadDraft()
+    if (!draft) return initial
+    const changed = (draft.markdown || '') !== initial
+    const titleEl = document.getElementById('title-input')
+    if (changed && confirm('Tienes un borrador sin guardar de esta página. ¿Restaurar?')) {
+      if (titleEl && draft.title) titleEl.value = draft.title
+      return draft.markdown
+    }
+    Pages._clearDraft()
+    return initial
   },
 
   async previewMermaid() {

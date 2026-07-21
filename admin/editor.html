@@ -28,6 +28,7 @@
     <div class="editor-actions">
       <button class="btn btn-primary" onclick="Pages.savePage()">Guardar</button>
       <button class="btn" onclick="Pages.previewMermaid()">Vista previa Mermaid</button>
+      <span id="editor-status" class="editor-status"></span>
       <a href="dashboard.html" class="btn">Cancelar</a>
     </div>
   </div>
@@ -65,6 +66,13 @@
       document.getElementById('title-field').style.display = isNew ? 'block' : 'none'
 
       await Pages.loadEditor()
+
+      window.addEventListener('beforeunload', (e) => {
+        if (Pages._dirty) {
+          e.preventDefault()
+          e.returnValue = ''
+        }
+      })
     })()
   </script>
 </body>
