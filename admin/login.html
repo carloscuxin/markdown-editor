@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Login - Editor de Documentación</title>
+  <link rel="stylesheet" href="../stylesheets/admin.css" />
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <h1>Editor de Documentación</h1>
+    <p>Ingresa tu Personal Access Token de GitHub para empezar.</p>
+
+    <label for="pat-input">Personal Access Token</label>
+    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+    <div id="login-error" class="login-error"></div>
+    <button class="btn btn-primary" id="login-btn">Conectar</button>
+
+    <div class="steps">
+      <h3>¿Cómo obtener tu token?</h3>
+      <ol>
+        <li>Ve a <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a></li>
+        <li>Haz clic en <strong>Generate new token</strong> → <strong>Fine-grained token</strong></li>
+        <li>En <strong>Repository access</strong>, selecciona <strong>Only select repositories</strong> y elige <code>carloscuxin/markdown-editor</code></li>
+        <li>En <strong>Permissions</strong> → <strong>Contents</strong>, selecciona <strong>Read and write</strong></li>
+        <li>Genera el token, cópialo y pégalo aquí</li>
+      </ol>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script>
+    (async () => {
+      const user = await Auth.validateToken()
+      if (user) window.location.href = 'editor.html'
+    })()
+
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const token = document.getElementById('pat-input').value.trim()
+      const errorEl = document.getElementById('login-error')
+      const btn = document.getElementById('login-btn')
+
+      if (!token) {
+        errorEl.textContent = 'Ingresa un token válido'
+        errorEl.style.display = 'block'
+        return
+      }
+
+      btn.disabled = true
+      btn.textContent = 'Conectando...'
+      errorEl.style.display = 'none'
+
+      const user = await Auth.login(token)
+      if (user) {
+        window.location.href = 'editor.html'
+      } else {
+        errorEl.textContent = 'Token inválido o sin permisos. Revisa las instrucciones.'
+        errorEl.style.display = 'block'
+        btn.disabled = false
+        btn.textContent = 'Conectar'
+      }
+    })
+
+    document.getElementById('pat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('login-btn').click()
+    })
+  </script>
+</body>
+</html>
