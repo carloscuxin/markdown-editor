@@ -1,69 +1,6 @@
 const Pages = {
   async loadDashboard() {
-    Pages._initTabs()
-    await Pages._renderWikiPanel()
     await Pages._renderAdminList()
-  },
-
-  _initTabs() {
-    const tabs = document.querySelectorAll('.dtab')
-    tabs.forEach(t => {
-      t.addEventListener('click', function () {
-        tabs.forEach(x => x.classList.remove('active'))
-        this.classList.add('active')
-        const mode = this.dataset.tab
-        document.getElementById('pages-list').style.display = mode === 'admin' ? '' : 'none'
-        document.getElementById('wiki-panel').style.display = mode === 'wiki' ? '' : 'none'
-        const hdr = document.querySelector('.dashboard-header')
-        if (hdr) hdr.style.display = mode === 'admin' ? '' : 'none'
-      })
-    })
-  },
-
-  async _renderWikiPanel() {
-    const panel = document.getElementById('wiki-panel-content')
-    if (!panel) return
-    try {
-      var meta = await API.getMeta()
-      if (!meta.pages || meta.pages.length === 0) {
-        await Pages.syncMeta()
-        meta = await API.getMeta()
-      }
-      const pages = meta.pages || []
-
-      function findChildren(parent) {
-        return pages.filter(p => p.parent === parent).sort((a, b) => (a.order || 0) - (b.order || 0))
-      }
-
-      function renderTree(parent, depth) {
-        var kids = findChildren(parent)
-        if (kids.length === 0) return ''
-        var h = '<ul style="list-style:none;padding-left:' + (depth * 18 + 8) + 'px">'
-        kids.forEach(function (p) {
-          var hasKids = findChildren(p.name).length > 0
-          h += '<li style="padding:4px 0">'
-          h += '<a href="../wiki/' + p.name + '" target="_blank" style="color:var(--primary);text-decoration:none;font-size:14px">' +
-            (p.title || p.name.replace('.html', '')) + '</a>'
-          if (hasKids) h += ' <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">(' + findChildren(p.name).length + ')</span>'
-          h += renderTree(p.name, depth + 1)
-          h += '</li>'
-        })
-        h += '</ul>'
-        return h
-      }
-
-      var roots = pages.filter(function (p) { return !p.parent })
-      if (roots.length === 0 && pages.length > 0) roots = pages
-
-      panel.innerHTML = '<div style="margin-bottom:16px">' +
-        '<span style="color:var(--text-secondary);font-size:13px">' + pages.length + ' p&aacute;ginas</span>' +
-        ' &middot; <a href="../wiki/index.html" target="_blank" style="color:var(--primary);font-size:13px">Ver index &rarr;</a>' +
-        '</div>' +
-        (roots.length ? renderTree(null, 0) :
-          '<p style="color:var(--text-secondary)">No hay p&aacute;ginas. <a href="editor.html">Crear la primera</a>.</p>')
-    } catch (e) {
-      panel.innerHTML = '<p class="error">No se pudo cargar el &aacute;rbol</p>'
-    }
   },
 
   async _renderAdminList() {
@@ -117,12 +54,6 @@ const Pages = {
     try {
       const { sha } = await API.getPage(filename)
       await API.deletePage(filename, sha)
-      // Delete .md version too
-      try {
-        const mdName = filename.replace('.html', '.md')
-        var { sha: mdSha } = await API.getPage(mdName)
-        await API.deletePage(mdName, mdSha)
-      } catch (_) {}
       await Pages._removeFromMeta(filename)
       this.showToast('Página eliminada', 'success')
       Pages.regenerateIndex()
@@ -153,25 +84,21 @@ const Pages = {
   },
 
   async syncMeta() {
-    try {
-      const files = await API.listPages()
-      const meta = await API.getMeta()
-      meta.pages = meta.pages || []
-      const existing = new Set(meta.pages.map(p => p.name))
-      let added = 0
-      files.forEach(f => {
-        if (f.name === 'index.html') return
-        if (existing.has(f.name)) return
-        meta.pages.push({ name: f.name, title: f.name.replace('.html', ''), parent: null, order: meta.pages.length })
-        added++
-      })
-      meta.pages = meta.pages.filter(p => files.some(f => f.name === p.name) || p.name === 'index.html')
-      meta.pages.forEach((p, i) => { p.order = i })
-      await API.saveMeta(meta)
-      return added
-    } catch (e) {
-      throw e
-    }
+    const files = await API.listPages()
+    const meta = await API.getMeta()
+    meta.pages = meta.pages || []
+    const existing = new Set(meta.pages.map(p => p.name))
+    let added = 0
+    files.forEach(f => {
+      if (f.name === 'index.html') return
+      if (existing.has(f.name)) return
+      meta.pages.push({ name: f.name, title: f.name.replace('.html', ''), parent: null, order: meta.pages.length })
+      added++
+    })
+    meta.pages = meta.pages.filter(p => files.some(f => f.name === p.name) || p.name === 'index.html')
+    meta.pages.forEach((p, i) => { p.order = i })
+    await API.saveMeta(meta)
+    return added
   },
 
   async loadEditor() {
@@ -198,7 +125,11 @@ const Pages = {
         this.initEditor(mdScript.textContent.replace(/\\<\//g, '</'))
         return
       }
-      const bodyHtml = Pages._extractBodyContent(content)
+      const _d = document.createElement('div')
+      _d.innerHTML = content
+      const _m = _d.querySelector('.wiki-content')
+      if (_m) _m.querySelectorAll('#wiki-breadcrumb, .wiki-page-title, #wiki-prevnext').forEach(function (el) { el.remove() })
+      const bodyHtml = _m ? _m.innerHTML.trim() : content
       const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
       turndownService.keep((node) => node.classList &&
         (node.classList.contains('callout') || node.classList.contains('tab-group') ||
@@ -235,7 +166,12 @@ const Pages = {
 
     window.editor.addHook('addImageBlobHook', async (blob, callback) => {
       try {
-        const base64 = await Pages._blobToBase64(blob)
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result.split(',')[1])
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
         const timestamp = Date.now()
         const origName = blob.name || `file-${timestamp}`
         const filename = `${timestamp}-${origName}`
@@ -262,18 +198,6 @@ const Pages = {
     })
   },
 
-  _blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const base64 = reader.result.split(',')[1]
-        resolve(base64)
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  },
-
   async savePage() {
     const params = new URLSearchParams(window.location.search)
     const filename = params.get('file')
@@ -291,8 +215,7 @@ const Pages = {
       name = raw
         .toLowerCase()
         .replace(/[^a-z0-9áéíóúüñ\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[\s-]+/g, '-')
         .replace(/^-|-$/g, '') + '.html'
     }
 
@@ -310,20 +233,12 @@ const Pages = {
 
     try {
       if (isNew) {
-        await API.createPage(name, fullHtml)
+        await API.savePage(name, fullHtml)
         await Pages._addToMeta(name, titleInput?.value || '')
       } else {
         const { sha } = await API.getPage(filename)
         await API.savePage(name, fullHtml, sha)
       }
-
-      // Save .md for GitHub viewing
-      try {
-        const mdName = name.replace('.html', '.md')
-        var mdSha = null
-        try { var m = await API.getPage(mdName); mdSha = m.sha } catch (_) {}
-        await API.savePage(mdName, markdown, mdSha)
-      } catch (_) {}
 
       this.showToast('Página guardada correctamente', 'success')
       Pages.regenerateIndex()
@@ -377,23 +292,6 @@ const Pages = {
     } catch (err) {
       container.innerHTML = `<div class="error">Error al renderizar: ${err.message}</div>`
     }
-  },
-
-  closeMermaidModal(event) {
-    if (event && event.target !== event.currentTarget) return
-    const modal = document.getElementById('mermaid-modal')
-    if (modal) modal.style.display = 'none'
-  },
-
-  _extractBodyContent(html) {
-    const doc = document.createElement('div')
-    doc.innerHTML = html
-    const main = doc.querySelector('.wiki-content')
-    if (!main) return html
-
-    const toRemove = main.querySelectorAll('#wiki-breadcrumb, .wiki-page-title, #wiki-prevnext')
-    toRemove.forEach(el => el.remove())
-    return main.innerHTML.trim()
   },
 
   wrapInTemplate(content, { title, markdown }) {

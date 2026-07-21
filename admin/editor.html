@@ -32,9 +32,9 @@
     </div>
   </div>
 
-  <div id="mermaid-modal" class="modal-overlay" style="display:none" onclick="Pages.closeMermaidModal(event)">
+  <div id="mermaid-modal" class="modal-overlay" style="display:none" onclick="if(event.target===event.currentTarget)document.getElementById('mermaid-modal').style.display='none'">
     <div class="modal-content">
-      <button class="modal-close" onclick="Pages.closeMermaidModal()">&times;</button>
+      <button class="modal-close" onclick="document.getElementById('mermaid-modal').style.display='none'">&times;</button>
       <h3>Vista previa Mermaid</h3>
       <div id="mermaid-container"></div>
     </div>

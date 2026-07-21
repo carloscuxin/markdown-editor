@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Páginas</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="../assets/css/wiki.css" />
 </head>
 <body>
   <header class="app-header">
@@ -25,18 +24,12 @@
     </aside>
 
     <main class="dashboard-main">
-      <div class="dashboard-tabs">
-        <button class="dtab active" data-tab="admin">Administraci&oacute;n</button>
-        <button class="dtab" data-tab="wiki">Documentaci&oacute;n</button>
-      </div>
-
       <div class="dashboard-header">
         <h2>Páginas</h2>
         <div style="display:flex;gap:6px">
           <a href="editor.html" class="btn btn-primary">+ Nueva página</a>
           <button class="btn btn-sm" onclick="Pages.syncMeta().then(n => { Pages.showToast('Sincronizado: ' + (n||0) + ' páginas', 'success'); Pages.loadDashboard(); Pages.loadTree() }).catch(e => Pages.showToast('Error: ' + e.message, 'error'))" title="Sincronizar meta con páginas existentes">&#8635; Sync</button>
-          <button class="btn btn-sm" onclick="Pages.regenerateIndex().then(() => Pages.showToast('Index regenerado', 'success'))" title="Regenerar wiki/index.html">Index</button>
-          <a href="../wiki/index.html" class="btn btn-sm" target="_blank" title="Ver wiki publicada">Ver wiki</a>
+          <a href="../wiki/index.html" class="btn btn-sm" title="Ver wiki publicada">Ver wiki</a>
         </div>
       </div>
 
@@ -45,10 +38,6 @@
       </div>
 
       <div id="pages-list"></div>
-
-      <div id="wiki-panel" style="display:none">
-        <div class="wiki-panel-content" id="wiki-panel-content"></div>
-      </div>
     </main>
   </div>
 

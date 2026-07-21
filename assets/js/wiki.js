@@ -1,11 +1,47 @@
 (function () {
   'use strict'
 
-  var curPage = (window.location.pathname.split('/').pop() || '').replace('.html', '') + '.html'
+  var curPage = window.location.pathname.split('/').pop() || ''
   var sidebar = document.getElementById('wiki-sidebar')
   var treeEl = document.getElementById('wiki-tree')
   var searchInput = document.getElementById('wiki-search')
   var meta = { pages: [] }
+
+  function navigateTo(href, replace) {
+    if (!href || href === curPage) return
+    var pageName = href.split('/').pop()
+    fetch(pageName)
+      .then(function (r) { return r.text() })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html')
+        var newContent = doc.querySelector('.wiki-content')
+        if (!newContent) return
+        document.querySelector('.wiki-content').innerHTML = newContent.innerHTML
+        curPage = pageName
+        if (!replace) history.pushState({ page: curPage }, '', curPage)
+        renderTree()
+        renderBreadcrumb()
+        renderPrevNext()
+        initTOC()
+        initMermaid()
+      })
+      .catch(function () { window.location.href = href })
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a')
+    if (!link) return
+    var href = link.getAttribute('href')
+    if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('//')) return
+    if (href.startsWith('../') || href.startsWith('/')) return
+    e.preventDefault()
+    navigateTo(href)
+  })
+
+  window.addEventListener('popstate', function (e) {
+    var page = e.state ? e.state.page : window.location.pathname.split('/').pop() || ''
+    if (page) navigateTo(page, true)
+  })
 
   // Tabs
   document.addEventListener('click', function (e) {
@@ -232,13 +268,6 @@
 
   // Init
   initMobileSidebar()
-
-  // Hide template title if content has its own h1 with same text
-  var pageTitle = document.querySelector('.wiki-page-title')
-  var contentH1 = document.querySelector('.wiki-content h1:not(.wiki-page-title)')
-  if (contentH1 && pageTitle && contentH1.textContent.trim() === pageTitle.textContent.trim()) {
-    pageTitle.style.display = 'none'
-  }
 
   fetch('_meta.json')
     .then(function (r) { return r.json() })

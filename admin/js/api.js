@@ -54,10 +54,6 @@ const API = {
     })
   },
 
-  async createPage(filename, content) {
-    return this.savePage(filename, content)
-  },
-
   async deletePage(filename, sha) {
     return this._request(this._repoURL(`/wiki/${encodeURIComponent(filename)}`), {
       method: 'DELETE',
