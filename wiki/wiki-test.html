@@ -28,19 +28,16 @@
       <h1 class="wiki-page-title">wiki-test</h1>
       <p>Esta es otra prueba de html</p>
 <br>
-```
-```mermaid
-flowchart TD
-    Client[Client / Partner Bank] -->|API| Gateway[Helios API Gateway]
-    Gateway --> Payments[Instant Payments Service]
-    Gateway --> Cards[Card Processing Service]
-    Payments --> Ledger[(Ledger)]
-    Payments --> Fraud[Fraud & Risk Engine]
-    Cards --> Fraud
-    Fraud --> Ledger
-    Ledger --> Notify[Notifications]
-```
-```
+<pre><code>flowchart TD
+    Client[Client / Partner Bank] --&gt;|API| Gateway[Helios API Gateway]
+    Gateway --&gt; Payments[Instant Payments Service]
+    Gateway --&gt; Cards[Card Processing Service]
+    Payments --&gt; Ledger[(Ledger)]
+    Payments --&gt; Fraud[Fraud &amp; Risk Engine]
+    Cards --&gt; Fraud
+    Fraud --&gt; Ledger
+    Ledger --&gt; Notify[Notifications]
+</code></pre>
       <nav class="wiki-prevnext" id="wiki-prevnext"></nav>
     </main>
   </div>
