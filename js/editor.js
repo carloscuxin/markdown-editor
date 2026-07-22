@@ -291,9 +291,44 @@ const Editor = {
   },
 
   preview() {
-    const md = new markdownit({ html: true, breaks: true, linkify: true })
+    const md = markdownit({
+      html: true,
+      breaks: true,
+      linkify: true,
+      highlight: (str, lang) => {
+        if (lang === 'mermaid') return `<pre class="language-mermaid"><code class="language-mermaid">${md.utils.escapeHtml(str)}</code></pre>`
+        if (lang && Prism.languages[lang]) {
+          try { return `<pre class="language-${lang}"><code class="language-${lang}">${Prism.highlight(str, Prism.languages[lang], lang)}</code></pre>` } catch (e) {}
+        }
+        return `<pre class="language-text"><code class="language-text">${md.utils.escapeHtml(str)}</code></pre>`
+      }
+    })
+      .use(markdownitFootnote)
+      .use(markdownitDeflist)
+      .use(markdownitMark)
+      .use(markdownitIns)
+      .use(markdownitSub)
+      .use(markdownitSup)
+      .use(markdownitEmoji)
+      .use(markdownitTaskLists, { enabled: true })
+
     const html = md.render(this._instance.getMarkdown())
-    document.getElementById('preview-content').innerHTML = html
+    const container = document.getElementById('preview-content')
+    container.innerHTML = `<div class="md-typeset" data-md-color-scheme="default">${html}</div>`
+
+    container.querySelectorAll('code.language-mermaid').forEach(el => {
+      const pre = el.parentElement
+      const div = document.createElement('div')
+      div.className = 'mermaid'
+      div.textContent = el.textContent
+      pre.replaceWith(div)
+    })
+
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' })
+      mermaid.run({ querySelector: '.mermaid' })
+    }
+
     document.getElementById('preview-modal').style.display = 'flex'
   },
 
