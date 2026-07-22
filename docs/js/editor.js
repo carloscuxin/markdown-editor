@@ -19,10 +19,16 @@ const Editor = {
 
     if (filePath) {
       this._currentPath = filePath
+      const segments = filePath.split('/')
+      const domain = segments[0] || ''
+      const sectionSlug = segments[1] || ''
       titleEl.textContent = `Editando: ${filePath}`
-      domainSelect.value = filePath.split('/')[0] || ''
-      domainSelect.disabled = true
-      navSelect.disabled = true
+      domainSelect.value = domain
+      this._updateNavSections(domain)
+      const map = this._navPathMap[domain] || this._navPathMap[domain.charAt(0).toUpperCase() + domain.slice(1)] || {}
+      for (const [sectionName, slug] of Object.entries(map)) {
+        if (slug === sectionSlug) { navSelect.value = sectionName; break }
+      }
       await this._loadDoc(filePath)
     } else {
       titleEl.textContent = 'Nuevo documento'
@@ -58,15 +64,18 @@ const Editor = {
         'User Guides': { 'Overview': true, 'Getting Started': true, 'Features': true, 'FAQ': true },
         'Templates': { 'Overview': true, 'Epic': true, 'User Story': true, 'BRD': true, 'Release Note': true, 'ADR': true, 'Meeting Notes': true },
       }
+      this._navPathMap = {}
       this._mkdocsContent = ''
     }
   },
 
   _parseNav(yamlContent) {
     const structure = {}
+    const pathMap = {}
     const lines = yamlContent.split('\n')
     let inNav = false
     let currentDomain = null
+    let currentSection = null
 
     for (const line of lines) {
       if (line.trim() === 'nav:') {
@@ -79,17 +88,27 @@ const Editor = {
         const match = line.match(/^  - ([\w][\w -]*):/)
         if (match) {
           currentDomain = match[1]
+          currentSection = null
           structure[currentDomain] = {}
+          pathMap[currentDomain] = {}
         }
       } else if (currentDomain && line.match(/^    - [\w][\w -]*:/)) {
         const match = line.match(/^    - ([\w][\w -]*):/)
         if (match) {
-          structure[currentDomain][match[1]] = true
+          currentSection = match[1]
+          structure[currentDomain][currentSection] = true
+        }
+      } else if (currentDomain && currentSection && !pathMap[currentDomain][currentSection]) {
+        const pathMatch = line.match(/^      - (?:.*?: )?([\w][\w\/-]+\.\w+)/)
+        if (pathMatch) {
+          const parts = pathMatch[1].split('/')
+          if (parts.length >= 2) pathMap[currentDomain][currentSection] = parts[1]
         }
       } else if (line.match(/^- /) && !line.startsWith('  ')) {
         break
       }
     }
+    this._navPathMap = pathMap
     return structure
   },
 
@@ -144,7 +163,6 @@ const Editor = {
       const titleInput = document.getElementById('doc-title')
       const filename = path.split('/').pop().replace('.md', '')
       titleInput.value = filename.replace(/-/g, ' ')
-      titleInput.disabled = true
       this._initEditor(content)
     } catch (err) {
       this._initEditor('')
