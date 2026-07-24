@@ -112,6 +112,8 @@ nav:
           - agile/epics/index.md
           - EPIC-001 - Instant Payments: agile/epics/epic-001-instant-payments.md
           - EPIC-002 - Fraud & Risk Screening: agile/epics/epic-002-fraud-risk-screening.md
+          - example epic:
+              - epic test: agile/episcs/example.md
       - User Stories:
           - agile/stories/index.md
           - HEL-142 - Send instant payment: agile/stories/hel-142-send-instant-payment.md
