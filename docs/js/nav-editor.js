@@ -40,7 +40,7 @@ const NavEditor = {
     document.getElementById('nav-tree-container').addEventListener('click', (e) => this._onTreeClick(e))
 
     document.addEventListener('keydown', (e) => {
-      const isSaveCombo = e.key.toLowerCase() === 's' && (e.ctrlKey || e.metaKey)
+      const isSaveCombo = (e.key || '').toLowerCase() === 's' && (e.ctrlKey || e.metaKey)
       if (!isSaveCombo) return
       e.preventDefault()
       if (this._currentState() === 'dirty') this._openSaveModal()
