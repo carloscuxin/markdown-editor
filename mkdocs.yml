@@ -106,63 +106,58 @@ plugins:
 
 nav:
   - Home: index.md
-  # --- Agile ---
   - Agile:
-    - Overview: agile/index.md
-    - User Stories:
-      - agile/stories/index.md
-      - "HEL-142 - Send instant payment": agile/stories/hel-142-send-instant-payment.md
-      - "HEL-158 - Real-time fraud score": agile/stories/hel-158-realtime-fraud-score.md
-    - Epics:
-      - agile/epics/index.md
-      - "EPIC-001 - Instant Payments": agile/epics/epic-001-instant-payments.md
-      - "EPIC-002 - Fraud & Risk Screening": agile/epics/epic-002-fraud-risk-screening.md
-    - Business Requirements:
-      - agile/brds/index.md
-      - "BRD - Instant Payments": agile/brds/brd-instant-payments.md
-    - Release Notes:
-      - agile/release-notes/index.md
-      - "v2.4.0": agile/release-notes/v2.4.0.md
-      - "v2.3.0": agile/release-notes/v2.3.0.md
-    - Reports:
-      - agile/reports/index.md
-      - "Sprint 42 Review": agile/reports/sprint-42-review.md
-      - "Sprint 42 Retrospective": agile/reports/sprint-42-retrospective.md
-    - Meeting Notes:
-      - agile/meeting-notes/index.md
-      - "PI Planning - Q3": agile/meeting-notes/pi-planning-q3.md
-  # --- Technical ---
+      - Overview: agile/index.md
+      - Epics:
+          - agile/epics/index.md
+          - EPIC-001 - Instant Payments: agile/epics/epic-001-instant-payments.md
+          - EPIC-002 - Fraud & Risk Screening: agile/epics/epic-002-fraud-risk-screening.md
+      - User Stories:
+          - agile/stories/index.md
+          - HEL-142 - Send instant payment: agile/stories/hel-142-send-instant-payment.md
+          - HEL-158 - Real-time fraud score: agile/stories/hel-158-realtime-fraud-score.md
+      - Business Requirements:
+          - agile/brds/index.md
+          - BRD - Instant Payments: agile/brds/brd-instant-payments.md
+      - Release Notes:
+          - agile/release-notes/index.md
+          - v2.4.0: agile/release-notes/v2.4.0.md
+          - v2.3.0: agile/release-notes/v2.3.0.md
+      - Reports:
+          - agile/reports/index.md
+          - Sprint 42 Review: agile/reports/sprint-42-review.md
+          - Sprint 42 Retrospective: agile/reports/sprint-42-retrospective.md
+      - Meeting Notes:
+          - agile/meeting-notes/index.md
+          - PI Planning - Q3: agile/meeting-notes/pi-planning-q3.md
   - Technical:
-    - Overview: technical/index.md
-    - API:
-      - technical/api/index.md
-    - Architecture:
-      - technical/architecture/index.md
-    - ADRs:
-      - technical/adrs/index.md
-    - Runbooks:
-      - technical/runbooks/index.md
-    - Batch Processing:
-      - "Playbook v1.1.0": technical/playbook-batch-processing-v110-resumen-ejecutivo-y-estandar-.md
-  # --- User Guides ---
+      - Overview: technical/index.md
+      - API:
+          - technical/api/index.md
+      - Architecture:
+          - technical/architecture/index.md
+      - ADRs:
+          - technical/adrs/index.md
+      - Runbooks:
+          - technical/runbooks/index.md
+      - Batch Processing:
+          - Playbook v1.1.0: technical/playbook-batch-processing-v110-resumen-ejecutivo-y-estandar-.md
   - User Guides:
-    - Overview: user-guides/index.md
-    - Getting Started:
-      - user-guides/getting-started/index.md
-    - Features:
-      - user-guides/features/index.md
-    - FAQ:
-      - user-guides/faq/index.md
-  # --- Templates ---
+      - Overview: user-guides/index.md
+      - Getting Started:
+          - user-guides/getting-started/index.md
+      - Features:
+          - user-guides/features/index.md
+      - FAQ:
+          - user-guides/faq/index.md
   - Templates:
-    - Overview: doc-templates/index.md
-    - Epic: doc-templates/epic-template.md
-    - User Story: doc-templates/user-story-template.md
-    - BRD: doc-templates/brd-template.md
-    - Release Note: doc-templates/release-note-template.md
-    - ADR: doc-templates/adr-template.md
-    - Meeting Notes: doc-templates/meeting-notes-template.md
-  # --- Editor ---
+      - Overview: doc-templates/index.md
+      - Epic: doc-templates/epic-template.md
+      - User Story: doc-templates/user-story-template.md
+      - BRD: doc-templates/brd-template.md
+      - Release Note: doc-templates/release-note-template.md
+      - ADR: doc-templates/adr-template.md
+      - Meeting Notes: doc-templates/meeting-notes-template.md
   - Editor:
-    - Contenido: admin/editor.html
-    - Navegacion: admin/nav-editor.html
+      - Contenido: admin/editor.html
+      - Navegacion: admin/nav-editor.html
