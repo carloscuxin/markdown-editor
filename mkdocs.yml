@@ -160,6 +160,8 @@ nav:
       - Meeting Notes: doc-templates/meeting-notes-template.md
   - Doc Tests:
       - Overview: doc-tests/index.md
+      - Doc Tests Section:
+          - Overview: doc-tests/doc-tests-section/index.md
   - Editor:
       - Contenido: admin/editor.html
       - Navegacion: admin/nav-editor.html
