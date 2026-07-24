@@ -360,7 +360,7 @@ ul.nav-tree { padding-left: 0; }
 }
 
 .nav-saving-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(255,255,255,0.6);
   display: flex;
@@ -369,9 +369,8 @@ ul.nav-tree { padding-left: 0; }
   justify-content: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  z-index: 10;
+  z-index: 1500;
 }
-.nav-tree-container { position: relative; }
 .nav-tree-locked { pointer-events: none; }
 
 .nav-spinner {
