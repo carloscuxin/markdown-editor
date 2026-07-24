@@ -167,6 +167,13 @@ const NavEditor = {
     return `<span class="nav-warning" title="El archivo aún no existe en el repo (docs/${escapeHtml(node.path || '')})">⚠</span>`
   },
 
+  // Solo permite enlazar a archivos que ya existen en docs/: crear la
+  // entrada de nav no crea el .md, y --strict falla si el archivo no existe.
+  _pathExists(path) {
+    if (!this._knownPaths) return true // aún no cargó el listado; no bloquear
+    return this._knownPaths.includes(path)
+  },
+
   _renderNode(node) {
     const isGroup = !!node.children
     const expanded = this._expanded.has(node.id)
@@ -277,6 +284,11 @@ const NavEditor = {
       if (field === 'label') {
         node.label = value === '' ? null : value
       } else {
+        if (value && !this._pathExists(value)) {
+          this._toast(`"${value}" no existe todavía en docs/. Creá el archivo desde el editor de contenido antes de enlazarlo.`, 'error')
+          this._render()
+          return
+        }
         node.path = value
       }
       this._markDirty()
@@ -345,6 +357,10 @@ const NavEditor = {
       this._insertNode({ id: this._nextId(), label, path: null, children: [] })
     } else {
       if (!path) { this._toast('Ingresá la ruta del archivo .md', 'error'); return }
+      if (!this._pathExists(path)) {
+        this._toast(`"${path}" no existe todavía en docs/. Creá el archivo desde el editor de contenido antes de agregarlo al menú.`, 'error')
+        return
+      }
       this._insertNode({ id: this._nextId(), label: label || null, path, children: null })
     }
 
@@ -375,6 +391,8 @@ const NavEditor = {
         else errors.push(...this._validateTree(n.children))
       } else if (!n.path || !n.path.trim()) {
         errors.push(`El nodo "${n.label || '(sin label)'}" no tiene una ruta de archivo.`)
+      } else if (!this._pathExists(n.path)) {
+        errors.push(`"${n.path}" no existe en docs/. Creá el archivo antes de guardar la navegación.`)
       }
     }
     return errors
