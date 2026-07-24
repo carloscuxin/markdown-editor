@@ -41,7 +41,7 @@ const API = {
   async getDoc(path) {
     const safePath = path.replace(/^\/+/, '').replace(/\.\./g, '')
     const data = await this._request(this._repoURL(`/docs/${safePath}`))
-    const content = atob(data.content.replace(/\n/g, ''))
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))))
     return { content, sha: data.sha, path: safePath }
   },
 
@@ -73,19 +73,27 @@ const API = {
 
   async getMkDocsYaml() {
     const data = await this._request(this._repoURL('/mkdocs.yml'))
-    const content = atob(data.content.replace(/\n/g, ''))
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))))
     return { content, sha: data.sha }
   },
 
-  async saveMkDocsYaml(content, sha) {
+  async saveMkDocsYaml(content, sha, message = 'docs: actualiza nav para nuevo documento') {
     return this._request(this._repoURL('/mkdocs.yml'), {
       method: 'PUT',
       body: JSON.stringify({
-        message: `docs: actualiza nav para nuevo documento`,
+        message,
         content: btoa(unescape(encodeURIComponent(content))),
         sha,
         branch: 'main',
       }),
     })
+  },
+
+  async listAllDocPaths() {
+    const data = await this._request(`https://api.github.com/repos/${this.OWNER}/${this.REPO}/git/trees/main?recursive=1`)
+    if (!Array.isArray(data.tree)) return []
+    return data.tree
+      .filter(f => f.type === 'blob' && f.path.startsWith('docs/') && f.path.endsWith('.md'))
+      .map(f => f.path.slice('docs/'.length))
   }
 }
