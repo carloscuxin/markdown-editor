@@ -77,15 +77,23 @@ const API = {
     return { content, sha: data.sha }
   },
 
-  async saveMkDocsYaml(content, sha) {
+  async saveMkDocsYaml(content, sha, message = 'docs: actualiza nav para nuevo documento') {
     return this._request(this._repoURL('/mkdocs.yml'), {
       method: 'PUT',
       body: JSON.stringify({
-        message: `docs: actualiza nav para nuevo documento`,
+        message,
         content: btoa(unescape(encodeURIComponent(content))),
         sha,
         branch: 'main',
       }),
     })
+  },
+
+  async listAllDocPaths() {
+    const data = await this._request(`https://api.github.com/repos/${this.OWNER}/${this.REPO}/git/trees/main?recursive=1`)
+    if (!Array.isArray(data.tree)) return []
+    return data.tree
+      .filter(f => f.type === 'blob' && f.path.startsWith('docs/') && f.path.endsWith('.md'))
+      .map(f => f.path.slice('docs/'.length))
   }
 }

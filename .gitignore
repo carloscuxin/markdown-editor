@@ -19,3 +19,8 @@ site/
 
 # Superpowers (planes/specs internos, no parte del sitio)
 docs/superpowers/
+
+
+# Agents
+AGENTS.md
+CLAUDE.md

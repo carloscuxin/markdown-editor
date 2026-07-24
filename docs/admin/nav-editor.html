@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Navegación - Editor de Documentación</title>
+  <link rel="stylesheet" href="../stylesheets/material.min.css" />
+  <link rel="stylesheet" href="../stylesheets/palette.min.css" />
+  <link rel="stylesheet" href="../stylesheets/admin.css" />
+</head>
+<body class="editor-page">
+  <header class="editor-header">
+    <div class="editor-header-left">
+      <a href="../index.html" class="btn btn-sm">← Volver al sitio</a>
+      <a href="editor.html" class="btn btn-sm">Editor de contenido</a>
+      <h1>Navegación</h1>
+    </div>
+    <div class="editor-header-right">
+      <span id="user-info"></span>
+      <button class="btn btn-sm" onclick="Auth.logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div id="reload-banner" class="nav-reload-banner" style="display:none">
+    <span>mkdocs.yml cambió en GitHub desde que cargaste esta vista.</span>
+    <button class="btn btn-sm" id="reload-btn">Recargar</button>
+  </div>
+
+  <div class="nav-editor-toolbar">
+    <p class="nav-editor-hint">
+      Arrastrá los nodos para reordenarlos, hacé clic en un label o ruta para editarlo.
+      Cada guardado hace un commit directo a <code>main</code>.
+    </p>
+    <div class="nav-editor-toolbar-actions">
+      <button class="btn btn-sm" id="add-root-btn">+ Nueva sección en la raíz</button>
+      <button class="btn btn-primary" id="save-btn">Guardar cambios</button>
+      <span id="nav-status" class="editor-status"></span>
+    </div>
+  </div>
+
+  <div id="nav-tree-container" class="nav-tree-container">
+    <p class="nav-editor-loading">Cargando mkdocs.yml…</p>
+  </div>
+
+  <datalist id="known-paths-list"></datalist>
+
+  <!-- Add node modal -->
+  <div id="add-modal" class="modal-overlay" style="display:none" onclick="if(event.target===event.currentTarget)this.style.display='none'">
+    <div class="modal-content modal-small">
+      <button class="modal-close" onclick="document.getElementById('add-modal').style.display='none'">&times;</button>
+      <h3 id="add-modal-title">Agregar nodo</h3>
+      <form id="add-form">
+        <div class="form-row">
+          <label><input type="radio" name="add-type" value="group" checked /> Sección (grupo)</label>
+          <label><input type="radio" name="add-type" value="page" /> Página (archivo .md)</label>
+        </div>
+        <div class="form-row">
+          <label for="add-label-input">Label</label>
+          <input type="text" id="add-label-input" placeholder="Título visible en el menú" />
+        </div>
+        <div class="form-row" id="add-path-field" style="display:none">
+          <label for="add-path-input">Ruta del archivo (relativa a docs/)</label>
+          <input type="text" id="add-path-input" placeholder="agile/epics/index.md" list="known-paths-list" />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-sm" id="cancel-add-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Agregar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Save / diff preview modal -->
+  <div id="save-modal" class="modal-overlay" style="display:none">
+    <div class="modal-content modal-large">
+      <button class="modal-close" onclick="document.getElementById('save-modal').style.display='none'">&times;</button>
+      <h3>Confirmar cambios en la navegación</h3>
+      <p class="nav-editor-hint">
+        Esto va a hacer un commit directo a <code>main</code> reemplazando el bloque <code>nav:</code> de <code>mkdocs.yml</code>.
+        Los comentarios que hubiera dentro de <code>nav:</code> (por ejemplo <code># --- Agile ---</code>) no se conservan.
+      </p>
+      <div class="diff-grid">
+        <div>
+          <h4>Antes</h4>
+          <pre class="diff-pane" id="diff-before"></pre>
+        </div>
+        <div>
+          <h4>Después</h4>
+          <pre class="diff-pane" id="diff-after"></pre>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-sm" id="cancel-save-btn">Cancelar</button>
+        <button class="btn btn-primary" id="confirm-save-btn">Confirmar y guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/nav-editor.js"></script>
+  <script>
+    (async () => {
+      const user = await Auth.validateToken()
+      if (!user) { window.location.href = 'login.html'; return }
+
+      document.getElementById('user-info').innerHTML = `
+        <span>${user.login}</span>
+        <img src="${user.avatar_url}" alt="" class="avatar" />
+      `
+
+      await NavEditor.init()
+
+      window.addEventListener('beforeunload', (e) => {
+        if (NavEditor._dirty) {
+          e.preventDefault()
+          e.returnValue = ''
+        }
+      })
+    })()
+  </script>
+</body>
+</html>
