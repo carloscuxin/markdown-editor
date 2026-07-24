@@ -106,6 +106,18 @@ plugins:
 
 nav:
   - Home: index.md
+  - Technical:
+      - Overview: technical/index.md
+      - API:
+          - technical/api/index.md
+      - Architecture:
+          - technical/architecture/index.md
+      - ADRs:
+          - technical/adrs/index.md
+      - Runbooks:
+          - technical/runbooks/index.md
+      - Batch Processing:
+          - Playbook v1.1.0: technical/playbook-batch-processing-v110-resumen-ejecutivo-y-estandar-.md
   - Agile:
       - Overview: agile/index.md
       - Epics:
@@ -130,18 +142,6 @@ nav:
       - Meeting Notes:
           - agile/meeting-notes/index.md
           - PI Planning - Q3: agile/meeting-notes/pi-planning-q3.md
-  - Technical:
-      - Overview: technical/index.md
-      - API:
-          - technical/api/index.md
-      - Architecture:
-          - technical/architecture/index.md
-      - ADRs:
-          - technical/adrs/index.md
-      - Runbooks:
-          - technical/runbooks/index.md
-      - Batch Processing:
-          - Playbook v1.1.0: technical/playbook-batch-processing-v110-resumen-ejecutivo-y-estandar-.md
   - User Guides:
       - Overview: user-guides/index.md
       - Getting Started:
