@@ -243,6 +243,24 @@ const NavEditor = {
     return search(this._tree) || this._tree
   },
 
+  _findParent(nodeId) {
+    for (const n of Object.values(this._nodeMap)) {
+      if (n.children && n.children.some(c => c.id === nodeId)) return n
+    }
+    return null
+  },
+
+  _parentDirPath(parentId) {
+    if (!parentId) return ''
+    const parts = []
+    let current = this._nodeMap[parentId]
+    while (current) {
+      parts.unshift(this._slugify(current.label))
+      current = this._findParent(current.id)
+    }
+    return parts.join('/')
+  },
+
   _labelError(label, siblings, excludeId) {
     if (!label || !label.trim()) return 'El label no puede estar vacío.'
     if (label.length > 80) return 'El label no puede superar los 80 caracteres.'
@@ -531,7 +549,8 @@ const NavEditor = {
     if (type === 'group') {
       const err = this._labelError(label, siblings, null)
       if (err) { this._toast(err, 'error'); return }
-      const pagePath = `${this._slugify(label)}/index.md`
+      const dirPrefix = this._parentDirPath(this._addModalParentId)
+      const pagePath = dirPrefix ? `${dirPrefix}/${this._slugify(label)}/index.md` : `${this._slugify(label)}/index.md`
       const pageNode = { id: this._nextId(), label: 'Overview', path: pagePath, children: null }
       const groupNode = { id: this._nextId(), label, path: null, children: [pageNode] }
       this._insertNode(groupNode)
