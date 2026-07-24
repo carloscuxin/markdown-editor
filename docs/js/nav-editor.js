@@ -15,6 +15,7 @@ const NavEditor = {
   _pendingYaml: null,
   _addModalParentId: null,
   _toastTimer: null,
+  _adminNodes: [],
 
   async init() {
     document.getElementById('add-root-btn').addEventListener('click', () => this._openAddModal(null))
@@ -158,8 +159,25 @@ const NavEditor = {
     return `n${Date.now().toString(36)}${this._idCounter}`
   },
 
-  _parseList(list) {
-    return (list || []).map(item => this._parseItem(item))
+  _isAdminNode(node) {
+    if (node.path && /^admin\//.test(node.path)) return true
+    if (node.children && node.children.every(c => this._isAdminNode(c))) return true
+    return false
+  },
+
+  _parseList(list, allowAdmin = true) {
+    const nodes = (list || []).map(item => this._parseItem(item))
+    if (!allowAdmin) return nodes
+    const docNodes = []
+    this._adminNodes = []
+    for (const n of nodes) {
+      if (this._isAdminNode(n)) {
+        this._adminNodes.push(n)
+      } else {
+        docNodes.push(n)
+      }
+    }
+    return docNodes
   },
 
   _parseItem(item) {
@@ -169,13 +187,14 @@ const NavEditor = {
     const key = Object.keys(item)[0]
     const value = item[key]
     if (Array.isArray(value)) {
-      return { id: this._nextId(), label: key, path: null, children: this._parseList(value) }
+      return { id: this._nextId(), label: key, path: null, children: this._parseList(value, false) }
     }
     return { id: this._nextId(), label: key, path: value, children: null }
   },
 
   _serializeNav(tree) {
-    const dumped = jsyaml.dump({ nav: this._toYamlList(tree) }, { lineWidth: -1, noRefs: true, indent: 2 })
+    const allNav = [...this._toYamlList(tree), ...this._toYamlList(this._adminNodes)]
+    const dumped = jsyaml.dump({ nav: allNav }, { lineWidth: -1, noRefs: true, indent: 2 })
     return dumped.trimEnd() + '\n'
   },
 
@@ -191,6 +210,14 @@ const NavEditor = {
       return { [node.label]: node.path }
     }
     return node.path
+  },
+
+  _slugify(text) {
+    return text
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
   },
 
   _indexTree() {
@@ -504,7 +531,15 @@ const NavEditor = {
     if (type === 'group') {
       const err = this._labelError(label, siblings, null)
       if (err) { this._toast(err, 'error'); return }
-      this._insertNode({ id: this._nextId(), label, path: null, children: [] })
+      const pagePath = `${this._slugify(label)}/index.md`
+      const pageNode = { id: this._nextId(), label: 'Overview', path: pagePath, children: null }
+      const groupNode = { id: this._nextId(), label, path: null, children: [pageNode] }
+      this._insertNode(groupNode)
+      if (this._knownPaths && !this._knownPaths.includes(pagePath)) {
+        this._knownPaths.unshift(pagePath)
+      }
+      this._withTimeout(API.saveDoc(pagePath, `# ${label}\n\nComing soon.\n`, null))
+        .catch(() => {})
     } else {
       if (!path) { this._toast('Ingresá la ruta del archivo .md', 'error'); return }
       if (label) {
