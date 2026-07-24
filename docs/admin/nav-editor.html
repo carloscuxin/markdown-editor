@@ -33,14 +33,20 @@
       Cada guardado hace un commit directo a <code>main</code>.
     </p>
     <div class="nav-editor-toolbar-actions">
+      <span id="dirty-badge" class="nav-dirty-badge" style="display:none">● Cambios no guardados</span>
+      <button class="btn btn-sm" id="preview-btn">Vista previa</button>
+      <button class="btn btn-sm" id="discard-btn" style="display:none">Descartar cambios</button>
       <button class="btn btn-sm" id="add-root-btn">+ Nueva sección en la raíz</button>
-      <button class="btn btn-primary" id="save-btn">Guardar cambios</button>
-      <span id="nav-status" class="editor-status"></span>
+      <button class="btn btn-primary" id="save-btn" disabled>Guardar cambios</button>
     </div>
   </div>
 
   <div id="nav-tree-container" class="nav-tree-container">
     <p class="nav-editor-loading">Cargando mkdocs.yml…</p>
+    <div id="saving-overlay" class="nav-saving-overlay" style="display:none">
+      <div class="nav-spinner"></div>
+      <span>Guardando…</span>
+    </div>
   </div>
 
   <datalist id="known-paths-list"></datalist>
@@ -97,6 +103,16 @@
     </div>
   </div>
 
+  <!-- Preview modal -->
+  <div id="preview-modal" class="modal-overlay" style="display:none" onclick="if(event.target===event.currentTarget)this.style.display='none'">
+    <div class="modal-content modal-large">
+      <button class="modal-close" id="close-preview-btn">&times;</button>
+      <h3>Vista previa de la navegación</h3>
+      <p class="nav-editor-hint">Así se vería la jerarquía del menú publicado (sólo estructura, sin estilos del tema).</p>
+      <div id="preview-body" class="nav-preview-body"></div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
@@ -117,7 +133,7 @@
       await NavEditor.init()
 
       window.addEventListener('beforeunload', (e) => {
-        if (NavEditor._dirty) {
+        if (NavEditor.state === 'dirty' || NavEditor.state === 'error') {
           e.preventDefault()
           e.returnValue = ''
         }
