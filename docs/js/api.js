@@ -41,7 +41,7 @@ const API = {
   async getDoc(path) {
     const safePath = path.replace(/^\/+/, '').replace(/\.\./g, '')
     const data = await this._request(this._repoURL(`/docs/${safePath}`))
-    const content = atob(data.content.replace(/\n/g, ''))
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))))
     return { content, sha: data.sha, path: safePath }
   },
 
@@ -73,7 +73,7 @@ const API = {
 
   async getMkDocsYaml() {
     const data = await this._request(this._repoURL('/mkdocs.yml'))
-    const content = atob(data.content.replace(/\n/g, ''))
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))))
     return { content, sha: data.sha }
   },
 
