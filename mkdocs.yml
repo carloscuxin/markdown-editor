@@ -159,6 +159,8 @@ nav:
   - Doc Tests:
       - Overview: doc-tests/index.md
       - Doc Tests Section:
+          - DDD: 
+              - doc-tests/doc-tests-section/ddd/index.md
           - Docs sub section: doc-tests/doc-tests-section/index.md
           - Sub section file: doc-tests/doc-tests-section/sub-section-file.md
           - Sub section file 2: doc-tests/doc-tests-section/sub-section-file-2.md
