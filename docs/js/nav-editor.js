@@ -37,6 +37,7 @@ const NavEditor = {
     document.querySelectorAll('input[name="add-type"]').forEach(r => {
       r.addEventListener('change', () => this._updateAddModalFields())
     })
+    document.getElementById('add-label-input').addEventListener('input', () => this._updateAddModalFields())
 
     document.getElementById('nav-tree-container').addEventListener('click', (e) => this._onTreeClick(e))
 
@@ -79,10 +80,10 @@ const NavEditor = {
     }
     const msg = (err && err.message) || ''
     if (/rate limit/i.test(msg)) {
-      return 'Límite de API de GitHub excedido. Intentá de nuevo en unos minutos.'
+      return 'Límite de API de GitHub excedido. Intenta de nuevo en unos minutos.'
     }
     if (/sha|conflict|does not match/i.test(msg)) {
-      return 'El archivo cambió en GitHub. Recargá la página para ver la versión más reciente.'
+      return 'El archivo cambió en GitHub. Recarga la página para ver la versión más reciente.'
     }
     return msg || 'Ocurrió un error inesperado.'
   },
@@ -250,22 +251,53 @@ const NavEditor = {
     return null
   },
 
-  _parentDirPath(parentId) {
-    if (!parentId) return ''
+  _dirOf(path) {
+    return (path || '').split('/').slice(0, -1).join('/')
+  },
+
+  // Carpeta destino de una sección. Se deduce de las rutas que ya cuelgan de
+  // ella (más fiable que el slug del label: una sección puede haberse
+  // renombrado sin mover sus archivos); si la sección todavía no tiene ninguna
+  // página, se cae al encadenado de slugs de los labels.
+  _groupDirPath(node) {
+    if (!node) return ''
+    const children = node.children || []
+    const childPage = children.find(c => c.path)
+    if (childPage) return this._dirOf(childPage.path)
+    for (const child of children) {
+      if (!child.children) continue
+      const childDir = this._groupDirPath(child)
+      if (childDir) return this._dirOf(childDir)
+    }
     const parts = []
-    let current = this._nodeMap[parentId]
+    let current = node
     while (current) {
       parts.unshift(this._slugify(current.label))
       current = this._findParent(current.id)
     }
-    return parts.join('/')
+    return parts.filter(Boolean).join('/')
+  },
+
+  _parentDirPath(parentId) {
+    if (!parentId) return ''
+    return this._groupDirPath(this._nodeMap[parentId])
+  },
+
+  // Ruta del .md que se creará para un nuevo nodo, a partir del nombre que
+  // escribió el usuario y de dónde se disparó el "+" (nunca se pide a mano).
+  _pathForNewNode(type, label, parentId) {
+    const slug = this._slugify(label)
+    if (!slug) return null
+    const dir = this._parentDirPath(parentId)
+    const name = type === 'group' ? `${slug}/index.md` : `${slug}.md`
+    return dir ? `${dir}/${name}` : name
   },
 
   _labelError(label, siblings, excludeId) {
-    if (!label || !label.trim()) return 'El label no puede estar vacío.'
-    if (label.length > 80) return 'El label no puede superar los 80 caracteres.'
+    if (!label || !label.trim()) return 'El nombre no puede estar vacío.'
+    if (label.length > 80) return 'El nombre no puede superar los 80 caracteres.'
     const dup = siblings.some(n => n.id !== excludeId && n.label === label)
-    if (dup) return `Ya existe un elemento con el label "${label}" en este nivel.`
+    if (dup) return `Ya existe un elemento llamado "${label}" en este nivel.`
     return null
   },
 
@@ -370,7 +402,7 @@ const NavEditor = {
           <span class="nav-drag-handle" title="Arrastrar para reordenar">⠿</span>
           ${toggle}
           <span class="nav-icon">${isGroup ? '📁' : '📄'}</span>
-          <span class="nav-label" data-action="edit-label" title="Editar label">${labelText}</span>
+          <span class="nav-label" data-action="edit-label" title="Editar nombre">${labelText}</span>
           ${pathHtml}
           ${this._pathWarning(node)}
           <span class="nav-actions">
@@ -469,7 +501,7 @@ const NavEditor = {
         node.label = value === '' ? null : value
       } else {
         if (value && !this._pathExists(value)) {
-          this._toast(`"${value}" no existe todavía en docs/. Creá el archivo desde el editor de contenido antes de enlazarlo.`, 'error')
+          this._toast(`"${value}" no existe todavía en docs/. Crea el archivo desde el editor de contenido antes de enlazarlo.`, 'error')
           this._render()
           return
         }
@@ -525,14 +557,28 @@ const NavEditor = {
     this._updateAddModalFields()
     document.getElementById('add-modal-title').textContent = parentId
       ? `Agregar dentro de "${this._nodeMap[parentId].label || this._nodeMap[parentId].path}"`
-      : 'Agregar sección en la raíz'
+      : 'Agregar en la raíz'
     document.getElementById('add-modal').style.display = 'flex'
     document.getElementById('add-label-input').focus()
   },
 
   _updateAddModalFields() {
     const type = document.querySelector('input[name="add-type"]:checked').value
-    document.getElementById('add-path-field').style.display = type === 'page' ? 'block' : 'none'
+    const label = document.getElementById('add-label-input').value.trim()
+    document.getElementById('add-label-caption').textContent = type === 'group'
+      ? 'Nombre de la sección'
+      : 'Título de la página'
+
+    const dir = this._parentDirPath(this._addModalParentId)
+    const path = label ? this._pathForNewNode(type, label, this._addModalParentId) : null
+    const preview = document.getElementById('add-path-preview')
+    if (path) {
+      preview.textContent = `Se creará el archivo docs/${path}`
+    } else {
+      preview.textContent = type === 'group'
+        ? `La sección se creará dentro de docs/${dir ? dir + '/' : ''}`
+        : `La página se creará dentro de docs/${dir ? dir + '/' : ''}`
+    }
   },
 
   _addModalSiblings() {
@@ -543,36 +589,44 @@ const NavEditor = {
     e.preventDefault()
     const type = document.querySelector('input[name="add-type"]:checked').value
     const label = document.getElementById('add-label-input').value.trim()
-    const path = document.getElementById('add-path-input').value.trim()
     const siblings = this._addModalSiblings()
 
-    if (type === 'group') {
-      const err = this._labelError(label, siblings, null)
-      if (err) { this._toast(err, 'error'); return }
-      const dirPrefix = this._parentDirPath(this._addModalParentId)
-      const pagePath = dirPrefix ? `${dirPrefix}/${this._slugify(label)}/index.md` : `${this._slugify(label)}/index.md`
-      const pageNode = { id: this._nextId(), label: 'Overview', path: pagePath, children: null }
-      const groupNode = { id: this._nextId(), label, path: null, children: [pageNode] }
-      this._insertNode(groupNode)
-      if (this._knownPaths && !this._knownPaths.includes(pagePath)) {
-        this._knownPaths.unshift(pagePath)
-      }
-      this._withTimeout(API.saveDoc(pagePath, `# ${label}\n\nComing soon.\n`, null))
-        .catch(() => {})
-    } else {
-      if (!path) { this._toast('Ingresá la ruta del archivo .md', 'error'); return }
-      if (label) {
-        const err = this._labelError(label, siblings, null)
-        if (err) { this._toast(err, 'error'); return }
-      }
-      if (!this._pathExists(path)) {
-        this._toast(`"${path}" no existe todavía en docs/. Creá el archivo desde el editor de contenido antes de agregarlo al menú.`, 'error')
-        return
-      }
-      this._insertNode({ id: this._nextId(), label: label || null, path, children: null })
+    const labelErr = this._labelError(label, siblings, null)
+    if (labelErr) { this._toast(labelErr, 'error'); return }
+
+    const pagePath = this._pathForNewNode(type, label, this._addModalParentId)
+    if (!pagePath) {
+      this._toast('El nombre debe incluir al menos una letra o un número.', 'error')
+      return
     }
 
+    if (type === 'group') {
+      const pageNode = { id: this._nextId(), label: 'Overview', path: pagePath, children: null }
+      this._insertNode({ id: this._nextId(), label, path: null, children: [pageNode] })
+    } else {
+      this._insertNode({ id: this._nextId(), label, path: pagePath, children: null })
+    }
+
+    this._createDocFile(pagePath, label)
     document.getElementById('add-modal').style.display = 'none'
+  },
+
+  // El .md tiene que existir antes del próximo build: --strict falla si el nav
+  // apunta a un archivo inexistente. Si ya existe se reutiliza tal cual, nunca
+  // se sobrescribe contenido.
+  _createDocFile(path, title) {
+    if (this._knownPaths && this._knownPaths.includes(path)) {
+      this._toast(`docs/${path} ya existía; se enlazó al menú sin modificarlo.`, 'success')
+      return
+    }
+    if (this._knownPaths) this._knownPaths.unshift(path)
+    this._withTimeout(API.saveDoc(path, `# ${title}\n\nComing soon.\n`, null))
+      .then(() => this._toast(`Se creó docs/${path}`, 'success'))
+      .catch((err) => {
+        if (this._knownPaths) this._knownPaths = this._knownPaths.filter(p => p !== path)
+        this._toast(`No se pudo crear docs/${path}: ${this._classifyError(err)}`, 'error')
+        this._render()
+      })
   },
 
   _insertNode(node) {
@@ -612,18 +666,18 @@ const NavEditor = {
     const seenLabels = new Set()
     for (const n of nodes) {
       if (n.label) {
-        if (n.label.length > 80) errors.push(`El label "${n.label}" supera los 80 caracteres.`)
-        if (seenLabels.has(n.label)) errors.push(`Hay labels duplicados en el mismo nivel: "${n.label}".`)
+        if (n.label.length > 80) errors.push(`El nombre "${n.label}" supera los 80 caracteres.`)
+        if (seenLabels.has(n.label)) errors.push(`Hay nombres duplicados en el mismo nivel: "${n.label}".`)
         seenLabels.add(n.label)
       }
       if (n.children) {
         if (!n.label || !n.label.trim()) errors.push('Hay una sección sin nombre.')
-        if (n.children.length === 0) errors.push(`La sección "${n.label}" está vacía (agregá una página o eliminala).`)
+        if (n.children.length === 0) errors.push(`La sección "${n.label}" está vacía (agrega una página o elimínala).`)
         else errors.push(...this._validateTree(n.children))
       } else if (!n.path || !n.path.trim()) {
-        errors.push(`El nodo "${n.label || '(sin label)'}" no tiene una ruta de archivo.`)
+        errors.push(`El elemento "${n.label || '(sin nombre)'}" no tiene una ruta de archivo.`)
       } else if (!this._pathExists(n.path)) {
-        errors.push(`"${n.path}" no existe en docs/. Creá el archivo antes de guardar la navegación.`)
+        errors.push(`"${n.path}" no existe en docs/. Crea el archivo antes de guardar la navegación.`)
       }
     }
     return errors
@@ -715,7 +769,7 @@ const NavEditor = {
         document.getElementById('reload-banner').style.display = 'flex'
         this._saving = false
         this._errorSticky = true
-        this._toast('mkdocs.yml cambió en GitHub mientras editabas. Recargá para traer la última versión.', 'error')
+        this._toast('mkdocs.yml cambió en GitHub mientras editabas. Recarga para traer la última versión.', 'error')
         this._syncState()
         confirmBtn.disabled = false
         return

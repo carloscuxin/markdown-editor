@@ -29,7 +29,7 @@
 
   <div class="nav-editor-toolbar">
     <p class="nav-editor-hint">
-      Arrastrá los nodos para reordenarlos, hacé clic en un label o ruta para editarlo.
+      Arrastra los elementos para reordenarlos y haz clic en un nombre o una ruta para editarlo.
       Cada guardado hace un commit directo a <code>main</code>.
     </p>
     <div class="nav-editor-toolbar-actions">
@@ -55,19 +55,16 @@
   <div id="add-modal" class="modal-overlay" style="display:none" onclick="if(event.target===event.currentTarget)this.style.display='none'">
     <div class="modal-content modal-small">
       <button class="modal-close" onclick="document.getElementById('add-modal').style.display='none'">&times;</button>
-      <h3 id="add-modal-title">Agregar nodo</h3>
+      <h3 id="add-modal-title">Agregar elemento</h3>
       <form id="add-form">
         <div class="form-row">
-          <label><input type="radio" name="add-type" value="group" checked /> Sección (grupo)</label>
+          <label><input type="radio" name="add-type" value="group" checked /> Sección (carpeta)</label>
           <label><input type="radio" name="add-type" value="page" /> Página (archivo .md)</label>
         </div>
         <div class="form-row">
-          <label for="add-label-input">Label</label>
+          <label for="add-label-input" id="add-label-caption">Nombre de la sección</label>
           <input type="text" id="add-label-input" placeholder="Título visible en el menú" />
-        </div>
-        <div class="form-row" id="add-path-field" style="display:none">
-          <label for="add-path-input">Ruta del archivo (relativa a docs/)</label>
-          <input type="text" id="add-path-input" placeholder="agile/epics/index.md" list="known-paths-list" />
+          <p class="nav-editor-hint" id="add-path-preview"></p>
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-sm" id="cancel-add-btn">Cancelar</button>
