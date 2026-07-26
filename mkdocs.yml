@@ -92,8 +92,6 @@ plugins:
   - git-revision-date-localized:
       type: datetime
       locale: es
-  - tags:
-      tags_file: tags.md
   - redirects:
       redirect_maps:
         'epics/index.md': 'agile/epics/index.md'
