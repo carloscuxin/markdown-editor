@@ -160,6 +160,7 @@ nav:
       - Overview: doc-tests/index.md
       - Doc Tests Section:
           - Docs sub section: doc-tests/doc-tests-section/index.md
+          - Sub section file: doc-tests/doc-tests-section/sub-section-file.md
   - Editor:
       - Contenido: admin/editor.html
       - Navegacion: admin/nav-editor.html
