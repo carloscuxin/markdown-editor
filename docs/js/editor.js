@@ -16,16 +16,18 @@ const Editor = {
     const newNavInput = document.getElementById('new-nav-input')
 
     await this._loadNavSections()
+    this._populateDomains()
 
     if (filePath) {
       this._currentPath = filePath
       const segments = filePath.split('/')
-      const domain = segments[0] || ''
+      const domainSlug = segments[0] || ''
       const sectionSlug = segments[1] || ''
+      const domain = this._findDomainKey(domainSlug)
       titleEl.textContent = `Editando: ${filePath}`
       domainSelect.value = domain
       this._updateNavSections(domain)
-      const map = this._navPathMap[domain] || this._navPathMap[domain.charAt(0).toUpperCase() + domain.slice(1)] || {}
+      const map = this._navPathMap[domain] || {}
       for (const [sectionName, slug] of Object.entries(map)) {
         if (slug === sectionSlug) { navSelect.value = sectionName; break }
       }
@@ -112,6 +114,23 @@ const Editor = {
     return structure
   },
 
+  _populateDomains() {
+    const domainSelect = document.getElementById('domain-select')
+    domainSelect.innerHTML = '<option value="">Dominio*</option>'
+    for (const domain of Object.keys(this._navStructure)) {
+      const opt = document.createElement('option')
+      opt.value = domain
+      opt.textContent = domain
+      domainSelect.appendChild(opt)
+    }
+  },
+
+  _findDomainKey(slug) {
+    // Find domain key that matches slug (case-insensitive)
+    const lower = slug.toLowerCase()
+    return Object.keys(this._navStructure).find(k => k.toLowerCase() === lower) || slug
+  },
+
   _updateNavSections(domain) {
     const navSelect = document.getElementById('nav-section-select')
     const newNavInput = document.getElementById('new-nav-input')
@@ -121,7 +140,7 @@ const Editor = {
 
     if (!domain) return
 
-    const sections = this._navStructure[domain] || this._navStructure[domain.charAt(0).toUpperCase() + domain.slice(1)] || {}
+    const sections = this._navStructure[domain] || {}
     for (const section of Object.keys(sections)) {
       const opt = document.createElement('option')
       opt.value = section
@@ -201,7 +220,6 @@ const Editor = {
           newNavInput.focus()
           return
         }
-        navSection = this._slugify(navSection)
       }
       if (!navSection) {
         this._toast('Seleccioná una sección del nav', 'error')
@@ -216,8 +234,10 @@ const Editor = {
         return
       }
 
-      const slug = this._slugify(docTitle) || 'documento'
-      path = `${domain}/${navSection}/${slug}.md`
+      const domainSlug = this._slugify(domain)
+      const sectionSlug = this._slugify(navSection)
+      const docSlug = this._slugify(docTitle) || 'documento'
+      path = `${domainSlug}/${sectionSlug}/${docSlug}.md`
 
       if (!this._navStructure[domain]) {
         this._navStructure[domain] = {}
